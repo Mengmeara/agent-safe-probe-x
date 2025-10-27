@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASB - AI Security Benchmark</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 30px rgba(102, 126, 234, 0.5); }
+            to { text-shadow: 0 0 40px rgba(102, 126, 234, 0.8); }
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card h2 {
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* 选择框样式优化 */
+        select.form-control {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            padding-right: 45px;
+            cursor: pointer;
+        }
+
+        /* 选择框选项样式 */
+        .form-control option {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            padding: 12px 15px;
+            border: none;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* 选择框选项悬停样式 */
+        .form-control option:hover {
+            background: rgba(102, 126, 234, 0.3);
+            color: var(--text-primary);
+        }
+
+        /* 选择框选项选中样式 */
+        .form-control option:checked {
+            background: rgba(102, 126, 234, 0.4);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* 选择框选项焦点样式 */
+        .form-control option:focus {
+            background: rgba(102, 126, 234, 0.3);
+            color: var(--text-primary);
+        }
+
+        /* 选择框选项激活样式 */
+        .form-control option:active {
+            background: rgba(102, 126, 234, 0.5);
+            color: var(--text-primary);
+        }
+
+        /* 选择框下拉列表样式（某些浏览器支持） */
+        .form-control option:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        /* 选择框分组样式 */
+        .form-control optgroup {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 8px 15px;
+        }
+
+        /* 选择框分组选项样式 */
+        .form-control optgroup option {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            padding-left: 25px;
+        }
+
+        /* 选择框在暗色主题下的额外优化 */
+        @media (prefers-color-scheme: dark) {
+            .form-control option {
+                background: #1a1a2e;
+                color: #ffffff;
+            }
+            
+            .form-control option:hover {
+                background: rgba(102, 126, 234, 0.4);
+            }
+            
+            .form-control option:checked {
+                background: rgba(102, 126, 234, 0.5);
+            }
+        }
+
+        /* 选择框过渡动画 */
+        .form-control option {
+            transition: all 0.2s ease;
+        }
+
+        /* 多选选择框样式 */
+        select.form-control[multiple] {
+            height: auto;
+            min-height: 120px;
+            padding: 8px;
+            border-radius: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        /* 多选选择框选项样式 */
+        select.form-control[multiple] option {
+            padding: 8px 12px;
+            margin: 2px 0;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        /* 多选选择框选项悬停样式 */
+        select.form-control[multiple] option:hover {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateX(2px);
+        }
+
+        /* 多选选择框选项选中样式 */
+        select.form-control[multiple] option:checked {
+            background: rgba(102, 126, 234, 0.6);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-color: rgba(102, 126, 234, 0.8);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 多选选择框选项焦点样式 */
+        select.form-control[multiple] option:focus {
+            background: rgba(102, 126, 234, 0.4);
+            outline: none;
+            border-color: rgba(102, 126, 234, 0.6);
+        }
+
+        /* 多选选择框滚动条样式 */
+        select.form-control[multiple]::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        select.form-control[multiple]::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        select.form-control[multiple]::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.6);
+            border-radius: 4px;
+        }
+
+        select.form-control[multiple]::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.8);
+        }
+
+        /* 表单提示文字样式 */
+        .form-text {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .form-text.text-muted {
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        /* 多选按钮样式 */
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-primary {
+            color: #667eea;
+            border-color: #667eea;
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            color: white;
+            background: #667eea;
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-secondary {
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+            background: transparent;
+        }
+
+        .btn-outline-secondary:hover {
+            color: white;
+            background: var(--text-secondary);
+            border-color: var(--text-secondary);
+            transform: translateY(-1px);
+        }
+
+        .me-2 {
+            margin-right: 8px;
+        }
+
+        .mt-2 {
+            margin-top: 8px;
+        }
+
+        .btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-right: 15px;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .status-queued { background: linear-gradient(45deg, #fbbf24, #f59e0b); }
+        .status-running { background: linear-gradient(45deg, #3b82f6, #1d4ed8); }
+        .status-completed { background: linear-gradient(45deg, #10b981, #059669); }
+        .status-failed { background: linear-gradient(45deg, #ef4444, #dc2626); }
+        .status-cancelled { background: linear-gradient(45deg, #6b7280, #4b5563); }
+
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .results-table th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .results-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .alert {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+            color: #6ee7b7;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #fca5a5;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            color: #93c5fd;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .task-info {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .task-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .task-info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .task-info-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .task-info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .icon {
+            font-size: 1.2em;
+        }
+
+        /* 实时日志显示样式 */
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .log-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .log-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-btn {
+            padding: 6px 12px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .log-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .log-btn.danger {
+            background: var(--danger-gradient);
+        }
+
+        .log-content {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .log-line {
+            margin-bottom: 4px;
+            padding: 2px 0;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .log-line.info {
+            color: #4facfe;
+        }
+
+        .log-line.warning {
+            color: #f093fb;
+        }
+
+        .log-line.error {
+            color: #fa709a;
+        }
+
+        .log-line.success {
+            color: #4facfe;
+        }
+
+        .log-line.debug {
+            color: #a0a0a0;
+            font-style: italic;
+        }
+
+        .log-timestamp {
+            color: var(--text-secondary);
+            margin-right: 8px;
+            font-size: 11px;
+        }
+
+        .log-level {
+            color: var(--text-secondary);
+            margin-right: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 1px 4px;
+            border-radius: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .log-message {
+            color: inherit;
+        }
+
+        .log-scroll-indicator {
+            position: sticky;
+            bottom: 0;
+            background: var(--primary-gradient);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-align: center;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 0;
+            max-width: 90vw;
+            max-height: 90vh;
+            width: 1000px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-modal {
+            width: 1200px;
+            max-width: 95vw;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .progress-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .progress-info p {
+            margin: 5px 0;
+            color: var(--text-primary);
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .connection-status.connected {
+            color: #4facfe;
+        }
+
+        .connection-status.disconnected {
+            color: #fa709a;
+        }
+
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .log-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .log-header h4 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .log-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .log-empty i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+
+            .log-container {
+                margin-top: 15px;
+                padding: 15px;
+            }
+
+            .log-content {
+                min-height: 150px;
+                max-height: 250px;
+            }
+        }
+
+        /* 文件信息样式 */
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 200px;
+        }
+
+        .file-name {
+            flex: 1;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-info .btn {
+            padding: 2px 6px;
+            font-size: 0.8em;
+            min-width: auto;
+        }
+
+        .text-success {
+            color: #28a745 !important;
+        }
+
+        .text-info {
+            color: #17a2b8 !important;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // 全局错误处理
+        window.addEventListener('error', function(e) {
+            console.error('全局JavaScript错误:', e.error);
+            document.body.innerHTML = `
+                <div style="padding: 20px; background: #ff4444; color: white; font-family: Arial;">
+                    <h2>JavaScript错误</h2>
+                    <p>错误: ${e.error?.message || '未知错误'}</p>
+                    <p>文件: ${e.filename}</p>
+                    <p>行号: ${e.lineno}</p>
+                    <button onclick="window.location.reload()" style="padding: 10px 20px; background: white; color: black; border: none; cursor: pointer;">重新加载</button>
+                </div>
+            `;
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('未处理的Promise拒绝:', e.reason);
+        });
+
+        const { useState, useEffect, useCallback } = React;
+
+        // 错误边界组件
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false, error: null };
+            }
+
+            static getDerivedStateFromError(error) {
+                return { hasError: true, error };
+            }
+
+            componentDidCatch(error, errorInfo) {
+                console.error('React错误:', error, errorInfo);
+            }
+
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div className="container">
+                            <div className="alert alert-error">
+                                <h2>应用出现错误</h2>
+                                <p>错误信息: {this.state.error?.message}</p>
+                                <button onClick={() => window.location.reload()}>重新加载页面</button>
+                            </div>
+                        </div>
+                    );
+                }
+
+                return this.props.children;
+            }
+        }
+
+        const AgentSecurityDetector = () => {
+            const [config, setConfig] = useState({
+                agent: '',
+                injection_method: 'observation_prompt_injection',
+                attack_tool: ['all'],
+                llms: ['llama3:8b'],
+                attack_types: ['context_ignoring'],
+                task_num: 1,
+                defense_type: null,
+                write_db: false,
+                read_db: false
+            });
+            
+            const [currentTask, setCurrentTask] = useState(null);
+            const [tasks, setTasks] = useState([]);
+            const [agents, setAgents] = useState([]);
+            const [attackTools, setAttackTools] = useState([]);
+            const [results, setResults] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(null);
+            const [success, setSuccess] = useState(null);
+            const [debugInfo, setDebugInfo] = useState(null);
+            const [generatedCommand, setGeneratedCommand] = useState(null);
+            const [socket, setSocket] = useState(null);
+            const [logs, setLogs] = useState([]);
+            const [isConnected, setIsConnected] = useState(false);
+            const [showProgressModal, setShowProgressModal] = useState(false);
+            const [currentProgressTaskId, setCurrentProgressTaskId] = useState(null);
+            const [currentProgressData, setCurrentProgressData] = useState(null);
+            const [modalMode, setModalMode] = useState('progress'); // 'progress' 或 'logs'
+            const [logFilter, setLogFilter] = useState('all'); // 'all', 'error', 'warning', 'info', 'debug'
+            const [historicalLogs, setHistoricalLogs] = useState([]); // 保存历史日志数据
+
+            // 初始化Socket.IO连接
+            useEffect(() => {
+                const newSocket = io();
+                setSocket(newSocket);
+
+                newSocket.on('connect', () => {
+                    console.log('Socket.IO连接已建立');
+                    setIsConnected(true);
+                });
+
+                newSocket.on('disconnect', () => {
+                    console.log('Socket.IO连接已断开');
+                    setIsConnected(false);
+                });
+
+                newSocket.on('log_message', (data) => {
+                    console.log('收到日志消息:', data);
+                    setLogs(prevLogs => [...prevLogs, {
+                        id: Date.now() + Math.random(),
+                        message: data.message,
+                        timestamp: data.timestamp,
+                        task_id: data.task_id
+                    }]);
+                });
+
+                newSocket.on('connected', (data) => {
+                    console.log('服务器确认连接:', data);
+                });
+
+                newSocket.on('joined_task', (data) => {
+                    console.log('已加入任务房间:', data);
+                });
+
+                // 监听任务状态变化
+                newSocket.on('task_status', (data) => {
+                    console.log('收到任务状态更新:', data);
+                    
+                    // 如果任务完成，自动切换到结果查看模式
+                    if (data.status === 'completed' && data.task_id === currentProgressTaskId) {
+                        console.log('任务完成，自动切换到结果查看模式');
+                        
+                        // 延迟一点时间确保结果文件已写入
+                        setTimeout(() => {
+                            // 自动加载结果
+                            loadTaskResult(data.task_id);
+                            
+                            // 切换到结果查看模式
+                            setShowProgress(false);
+                            setShowResults(true);
+                            
+                            // 显示成功消息
+                            setSuccess('🎉 检测完成！结果已自动加载');
+                        }, 2000); // 延迟2秒确保文件写入完成
+                    }
+                    
+                    // 如果任务失败
+                    if (data.status === 'failed' && data.task_id === currentProgressTaskId) {
+                        console.log('任务失败:', data);
+                        setError(`❌ 任务失败: ${data.current_step}`);
+                    }
+                });
+
+                return () => {
+                    newSocket.close();
+                };
+            }, []);
+
+            // 加入任务房间
+            const joinTaskRoom = (taskId) => {
+                if (socket) {
+                    socket.emit('join_task', { task_id: taskId });
+                    setLogs([]); // 清空之前的日志
+                }
+            };
+
+            // 离开任务房间
+            const leaveTaskRoom = (taskId) => {
+                if (socket) {
+                    socket.emit('leave_task', { task_id: taskId });
+                }
+            };
+
+            // 清空日志
+            const clearLogs = () => {
+                setLogs([]);
+            };
+
+            // 自动滚动到日志底部
+            useEffect(() => {
+                const logContent = document.querySelector('.log-content');
+                if (logContent && logs.length > 0) {
+                    logContent.scrollTop = logContent.scrollHeight;
+                }
+            }, [logs]);
+
+            // 加载初始数据
+            useEffect(() => {
+                loadAgents();
+                loadAttackTools();
+                loadTasks();
+            }, []);
+
+            // 轮询任务状态
+            useEffect(() => {
+                if (currentTask && currentTask.status === 'running') {
+                    const interval = setInterval(() => {
+                        checkTaskStatus(currentTask.id);
+                    }, 2000);
+                    return () => clearInterval(interval);
+                }
+            }, [currentTask]);
+
+            const loadAgents = async () => {
+                try {
+                    const response = await axios.get('/api/agents');
+                    setAgents(response.data);
+                } catch (err) {
+                    console.error('加载智能体失败:', err);
+                }
+            };
+
+            const loadAttackTools = async () => {
+                try {
+                    const response = await axios.get('/api/attack-tools');
+                    setAttackTools(response.data);
+                } catch (err) {
+                    console.error('加载攻击工具失败:', err);
+                }
+            };
+
+            const loadTasks = async () => {
+                try {
+                    const response = await axios.get('/api/tasks');
+                    setTasks(response.data);
+                } catch (err) {
+                    console.error('加载任务失败:', err);
+                }
+            };
+
+            const checkTaskStatus = async (taskId) => {
+                try {
+                    const response = await axios.get(`/api/detection/status/${taskId}`);
+                    const taskData = response.data;
+                    
+                    // 创建完整的任务对象
+                    const task = {
+                        id: taskData.task_id,
+                        status: taskData.status,
+                        progress: taskData.progress,
+                        current_step: taskData.current_step,
+                        created_time: taskData.created_time,
+                        start_time: taskData.start_time,
+                        end_time: taskData.end_time,
+                        config: taskData.config
+                    };
+                    
+                    setCurrentTask(task);
+                    
+                    if (task.status === 'completed') {
+                        // 任务完成后关闭进度模态框
+                        setShowProgressModal(false);
+                        setModalMode('progress'); // 重置为progress模式，为下次使用做准备
+                        
+                        // 加载任务结果
+                        await loadTaskResult(taskId);
+                        
+                        // 延迟滚动到任务历史部分，让用户看到完成的任务
+                        setTimeout(() => {
+                            // 查找包含"任务历史"文本的h2元素
+                            const headings = document.querySelectorAll('h2');
+                            let taskHistoryElement = null;
+                            for (let heading of headings) {
+                                if (heading.textContent.includes('任务历史')) {
+                                    taskHistoryElement = heading;
+                                    break;
+                                }
+                            }
+                            
+                            if (taskHistoryElement) {
+                                taskHistoryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }, 500);
+                    } else if (task.status === 'failed') {
+                        setError(`任务失败: ${task.current_step}`);
+                        // 任务失败时也关闭进度模态框
+                        setShowProgressModal(false);
+                    }
+                } catch (err) {
+                    console.error('检查任务状态失败:', err);
+                }
+            };
+
+            const loadTaskResult = async (taskId) => {
+                try {
+                    console.log('正在从后端获取任务结果:', taskId);
+                    
+                    // 强制从后端获取最新数据，不使用缓存
+                    const resultResponse = await axios.get(`/api/detection/result/${taskId}`, {
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
+                        }
+                    });
+                    
+                    // 尝试获取日志数据（可选）- 也强制从后端获取
+                    let logResponse = null;
+                    try {
+                        logResponse = await axios.get(`/api/detection/logs/${taskId}`, {
+                            headers: {
+                                'Cache-Control': 'no-cache',
+                                'Pragma': 'no-cache'
+                            }
+                        });
+                    } catch (logErr) {
+                        console.log('日志获取失败（这是正常的，某些任务可能没有日志）:', logErr.response?.data?.error || logErr.message);
+                        logResponse = { data: null };
+                    }
+                    
+                    console.log('API响应:', resultResponse.data);
+                    console.log('响应数据类型:', typeof resultResponse.data);
+                    
+                    // 确保数据是对象格式
+                    let resultData = resultResponse.data;
+                    if (typeof resultData === 'string') {
+                        try {
+                            // 处理NaN值，将其替换为null
+                            const cleanedData = resultData.replace(/:\s*NaN/g, ': null');
+                            resultData = JSON.parse(cleanedData);
+                        } catch (e) {
+                            console.error('解析JSON失败:', e);
+                            // 如果解析失败，尝试直接使用原始数据
+                            resultData = resultResponse.data;
+                        }
+                    }
+                    
+                    // 递归清理数据中的NaN值
+                    const cleanNaNValues = (obj) => {
+                        if (obj === null || obj === undefined) return obj;
+                        if (typeof obj === 'number' && isNaN(obj)) return null;
+                        if (Array.isArray(obj)) return obj.map(cleanNaNValues);
+                        if (typeof obj === 'object') {
+                            const cleaned = {};
+                            for (const [key, value] of Object.entries(obj)) {
+                                cleaned[key] = cleanNaNValues(value);
+                            }
+                            return cleaned;
+                        }
+                        return obj;
+                    };
+                    
+                    resultData = cleanNaNValues(resultData);
+                    
+                    // 如果没有summary字段，根据data生成summary
+                    if (!resultData.summary && resultData.data && Array.isArray(resultData.data)) {
+                        const totalTests = resultData.data.length;
+                        const successfulAttacks = resultData.data.filter(item => item.attack_success === true).length;
+                        const failedAttacks = totalTests - successfulAttacks;
+                        const successRate = totalTests > 0 ? Math.round((successfulAttacks / totalTests) * 100) : 0;
+                        
+                        resultData.summary = {
+                            total_tests: totalTests,
+                            successful_attacks: successfulAttacks,
+                            failed_attacks: failedAttacks,
+                            success_rate: successRate
+                        };
+                    }
+                    
+                    // 处理日志数据
+                    let logData = logResponse ? logResponse.data : null;
+                    
+                    // 如果没有日志数据，设置为空数组
+                    if (!logData) {
+                        logData = [];
+                    }
+                    
+                    // 如果返回的是对象，提取content字段
+                    if (typeof logData === 'object' && logData !== null && logData.content) {
+                        logData = logData.content;
+                    }
+                    
+                    if (typeof logData === 'string') {
+                        const logLines = logData.split('\n').filter(line => line.trim());
+                        logData = logLines.map((line, index) => {
+                            // 解析时间戳和级别
+                            const timestampMatch = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+                            const levelMatch = line.match(/(ERROR|WARNING|INFO|DEBUG)/);
+                            
+                            return {
+                                id: `log-${taskId}-${index}`,
+                                timestamp: timestampMatch ? timestampMatch[1] : new Date().toISOString(),
+                                level: levelMatch ? levelMatch[1].toLowerCase() : 'info',
+                                message: line
+                            };
+                        });
+                    } else if (!Array.isArray(logData)) {
+                        // 如果logData不是数组，初始化为空数组
+                        logData = [];
+                    }
+                    
+                    console.log('处理后的结果数据:', resultData);
+                    console.log('处理后的日志数据:', logData);
+                    
+                    // 详细调试信息
+                    
+                    setResults(resultData);
+                    setLogs(logData);
+                    setHistoricalLogs(logData); // 保存历史日志数据
+                    setCurrentProgressTaskId(taskId); // 设置当前任务ID用于文件下载
+                    setSuccess('🎉 检测完成！已从后端获取最新结果数据，您可以查看下方的检测结果');
+                    console.log('从后端获取的结果和日志已设置到状态中');
+                } catch (err) {
+                    console.error('获取结果失败:', err);
+                    setError('获取结果失败: ' + err.response?.data?.error || err.message);
+                }
+            };
+
+
+            const viewTaskProgress = async (taskId) => {
+                console.log('查看任务进度:', taskId);
+                setCurrentProgressTaskId(taskId);
+                setModalMode('progress');
+                setShowProgressModal(true);
+                setLogs([]); // 清空之前的日志
+                
+                // 加入任务房间
+                if (socket) {
+                    socket.emit('join_task', taskId);
+                }
+                
+                // 获取任务进度信息
+                try {
+                    const response = await axios.get(`/api/detection/progress/${taskId}`);
+                    console.log('任务进度信息:', response.data);
+                    setCurrentProgressData(response.data);
+                    
+                    // 如果有日志文件路径，可以显示相关信息
+                    if (response.data.log_file_path) {
+                        console.log('日志文件路径:', response.data.log_file_path);
+                    }
+                } catch (err) {
+                    console.error('获取任务进度失败:', err);
+                }
+            };
+
+            const closeProgressModal = () => {
+                setShowProgressModal(false);
+                // 不要重置 currentProgressTaskId，保持任务ID用于后续操作
+                setCurrentProgressData(null);
+                setLogs([]);
+                setModalMode('progress');
+            };
+
+
+            const viewTaskLogs = async (taskId) => {
+                try {
+                    console.log('正在获取任务日志:', taskId);
+                    const response = await axios.get(`/api/detection/logs/${taskId}`);
+                    console.log('日志API响应:', response.data);
+                    
+                    // 根据消息内容确定日志级别
+                    function getLogLevel(message) {
+                        const lowerMessage = message.toLowerCase();
+                        if (lowerMessage.includes('error') || lowerMessage.includes('failed') || lowerMessage.includes('exception')) {
+                            return 'error';
+                        } else if (lowerMessage.includes('warning') || lowerMessage.includes('warn')) {
+                            return 'warning';
+                        } else if (lowerMessage.includes('info') || lowerMessage.includes('starting') || lowerMessage.includes('completed')) {
+                            return 'info';
+                        } else if (lowerMessage.includes('debug')) {
+                            return 'debug';
+                        }
+                        return 'info';
+                    }
+                    
+                    // 解析日志内容为行数组
+                    const logContent = response.data.content || '';
+                    console.log('日志内容类型:', typeof logContent);
+                    console.log('日志内容长度:', logContent.length);
+                    
+                    // 确保logContent是字符串
+                    const contentStr = typeof logContent === 'string' ? logContent : String(logContent);
+                    const logLines = contentStr.split('\n').filter(line => line.trim() !== '');
+                    console.log('解析后的日志行数:', logLines.length);
+                    console.log('logLines类型:', typeof logLines);
+                    console.log('logLines是否为数组:', Array.isArray(logLines));
+                    console.log('logLines前3行:', logLines.slice(0, 3));
+                    
+                    // 确保logLines是数组
+                    if (!Array.isArray(logLines)) {
+                        console.error('logLines不是数组:', logLines);
+                        throw new Error('日志解析失败：无法将日志内容转换为数组');
+                    }
+                    
+                    // 转换为日志对象数组，尝试解析时间戳
+                    const parsedLogs = logLines.map((line, index) => {
+                        const trimmedLine = line.trim();
+                        
+                        // 尝试解析日志行中的时间戳 (格式: YYYY-MM-DD HH:MM:SS 或类似)
+                        const timestampMatch = trimmedLine.match(/^(\d{4}-\d{2}-\d{2}[\sT]\d{2}:\d{2}:\d{2})/);
+                        let timestamp = new Date().toISOString();
+                        let message = trimmedLine;
+                        
+                        if (timestampMatch) {
+                            try {
+                                timestamp = new Date(timestampMatch[1].replace(' ', 'T')).toISOString();
+                                message = trimmedLine.substring(timestampMatch[1].length).trim();
+                            } catch (e) {
+                                // 如果时间戳解析失败，使用当前时间
+                                timestamp = new Date().toISOString();
+                                message = trimmedLine;
+                            }
+                        }
+                        
+                        return {
+                            id: index,
+                            timestamp: timestamp,
+                            message: message,
+                            level: getLogLevel(message)
+                        };
+                    });
+                    
+                    // 显示日志内容
+                    setLogs(parsedLogs);
+                    setCurrentProgressTaskId(taskId);
+                    setModalMode('logs');
+                    setShowProgressModal(true);
+                    setCurrentProgressData({
+                        log_file: response.data.log_file,
+                        file_size: response.data.file_size,
+                        last_modified: response.data.last_modified
+                    });
+                    
+                } catch (err) {
+                    console.error('获取日志失败:', err);
+                    setError('获取日志失败: ' + (err.response?.data?.error || err.message));
+                }
+            };
+
+            const downloadFile = async (taskId, fileType) => {
+                try {
+                    console.log('正在下载文件:', taskId, fileType);
+                    
+                    let fileName = '';
+                    let apiEndpoint = '';
+                    
+                    if (fileType === 'result') {
+                        fileName = `detection_result_${taskId}.json`;
+                        apiEndpoint = `/api/detection/result/${taskId}`;
+                    } else if (fileType === 'log') {
+                        fileName = `detection_log_${taskId}.log`;
+                        apiEndpoint = `/api/detection/logs/${taskId}`;
+                    } else {
+                        throw new Error('不支持的文件类型');
+                    }
+                    
+                    // 获取文件内容
+                    const response = await axios.get(apiEndpoint);
+                    
+                    // 创建Blob对象
+                    let content = '';
+                    if (fileType === 'result') {
+                        content = JSON.stringify(response.data, null, 2);
+                    } else if (fileType === 'log') {
+                        content = response.data.content || response.data;
+                    }
+                    
+                    const blob = new Blob([content], { 
+                        type: fileType === 'result' ? 'application/json' : 'text/plain' 
+                    });
+                    
+                    // 创建下载链接
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    
+                    setSuccess(`文件下载已开始: ${fileName}`);
+                } catch (err) {
+                    console.error('下载文件失败:', err);
+                    setError('下载文件失败: ' + err.message);
+                }
+            };
+
+            const startDetection = async () => {
+                // 开始检测时，重新生成命令并启动任务
+                await generateCommandAndStart();
+            };
+
+            // 启动自定义命令检测
+            const startCustomDetection = async (customCommand) => {
+                console.log('开始自定义命令检测:', customCommand);
+                setDebugInfo('正在启动自定义命令检测...');
+                
+                setLoading(true);
+                setError(null);
+                setSuccess(null);
+                setResults(null);
+                setDebugInfo('发送自定义命令到API...');
+                
+                try {
+                    const configWithCommand = {
+                        ...config,
+                        custom_command: customCommand
+                    };
+                    
+                    console.log('发送自定义命令配置到API:', configWithCommand);
+                    const response = await axios.post('/api/detection/start', configWithCommand);
+                    console.log('API响应:', response.data);
+                    
+                    const taskData = response.data;
+                    // 创建完整的任务对象
+                    const task = {
+                        id: taskData.task_id,
+                        status: taskData.status,
+                        message: taskData.message,
+                        created_time: new Date().toISOString(),
+                        progress: 0
+                    };
+                    setCurrentTask(task);
+                    setSuccess('🚀 自定义命令检测任务已启动');
+                    setDebugInfo('自定义命令任务启动成功: ' + task.id);
+                    
+                    // 加入任务房间以接收实时日志
+                    joinTaskRoom(task.id);
+                    
+                    loadTasks();
+                } catch (err) {
+                    console.error('启动自定义命令检测失败:', err);
+                    const errorMsg = '启动自定义命令检测失败: ' + (err.response?.data?.error || err.message);
+                    setError(errorMsg);
+                    setDebugInfo('错误详情: ' + JSON.stringify(err.response?.data || err.message));
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const cancelDetection = async () => {
+                if (!currentTask) return;
+                
+                try {
+                    await axios.post(`/api/detection/cancel/${currentTask.id}`);
+                    setCurrentTask(null);
+                    setSuccess('⏹️ 任务已取消');
+                    loadTasks();
+                } catch (err) {
+                    setError('取消任务失败: ' + (err.response?.data?.error || err.message));
+                }
+            };
+
+            const updateConfig = (field, value) => {
+                setConfig(prev => ({
+                    ...prev,
+                    [field]: value
+                }));
+            };
+
+            const updateArrayConfig = (field, value) => {
+                const values = value.split(',').map(v => v.trim()).filter(v => v);
+                updateConfig(field, values);
+            };
+
+            // 在前端生成命令（不连接后端）
+            const generateCommandFrontend = () => {
+                if (!config.agent) {
+                    setError('请先选择一个智能体');
+                    return;
+                }
+
+                setError(null);
+                setSuccess(null);
+                setDebugInfo('正在生成命令行...');
+
+                try {
+                    // 生成时间戳
+                    const now = new Date();
+                    const timestamp = now.getFullYear().toString() +
+                        (now.getMonth() + 1).toString().padStart(2, '0') +
+                        now.getDate().toString().padStart(2, '0') + '_' +
+                        now.getHours().toString().padStart(2, '0') +
+                        now.getMinutes().toString().padStart(2, '0') +
+                        now.getSeconds().toString().padStart(2, '0');
+
+                    // 构建命令参数
+                    const attackTypes = config.attack_types.length > 0 ? config.attack_types : ['context_ignoring'];
+                    const llmName = config.llms[0] || 'llama3:8b';
+                    const injectionMethod = config.injection_method || 'observation_prompt_injection';
+                    
+                    // 为每个攻击类型生成命令
+                    const commands = attackTypes.map(attackType => {
+                        // 构建输出文件路径
+                        const logDir = `logs/${injectionMethod}/ollama:${llmName}/no_memory/single`;
+                        const csvFile = `${logDir}/${attackType}-single-${timestamp}.csv`;
+                        const logFile = `${logDir}/${attackType}-single-${timestamp}.log`;
+
+                        // 生成完整命令
+                        return `cd /home/flowteam/zqy/ASB && conda activate ASB && python main_attacker.py --llm_name ollama/${llmName} --attack_type ${attackType} --use_backend ollama --attacker_tools_path data/all_attack_tools.jsonl --task_num ${config.task_num} --single_agent ${config.agent} --workflow_mode manual --single --timestamp ${timestamp} --${injectionMethod} --res_file ${csvFile} > ${logFile} 2>&1`;
+                    });
+                    
+                    // 如果有多个攻击类型，用 && 连接命令
+                    const customCommand = commands.join(' && ');
+
+                    setGeneratedCommand(customCommand);
+                    setSuccess('✅ 命令行已生成（包含 --single 和 --timestamp 参数）');
+                    setDebugInfo('命令生成成功，包含所有必需参数');
+
+                } catch (err) {
+                    console.error('生成命令失败:', err);
+                    setError('生成命令失败: ' + err.message);
+                    setDebugInfo('错误详情: ' + err.message);
+                }
+            };
+
+            // 生成命令并发送到后端（用于开始检测）
+            const generateCommandAndStart = async () => {
+                if (!config.agent) {
+                    setError('请先选择一个智能体');
+                    return;
+                }
+
+                setLoading(true);
+                setError(null);
+                setSuccess(null);
+                setDebugInfo('正在生成命令行并启动检测...');
+
+                try {
+                    // 准备发送到后端API的数据
+                    const requestData = {
+                        single_agent: config.agent,
+                        attack_types: config.attack_types.length > 0 ? config.attack_types : ['context_ignoring'],
+                        llm_name: config.llms[0] || 'llama3:8b',
+                        use_backend: 'ollama',
+                        attacker_tools_path: 'data/all_attack_tools.jsonl',
+                        task_num: config.task_num,
+                        workflow_mode: 'manual',
+                        injection_method: config.injection_method
+                    };
+
+                    console.log('发送请求到后端API:', requestData);
+                    const response = await axios.post('/api/generate-command', requestData);
+                    console.log('后端API响应:', response.data);
+
+                    if (response.data.error) {
+                        setError('生成命令失败: ' + response.data.error);
+                        return;
+                    }
+
+                    const command = response.data.command;
+                    setGeneratedCommand(command);
+                    
+                    // 启动检测任务
+                    setDebugInfo('正在启动检测任务...');
+                    const detectionResponse = await axios.post('/api/detection/start', {
+                        ...config,
+                        custom_command: command
+                    });
+                    
+                    console.log('检测任务响应:', detectionResponse.data);
+                    
+                    const taskData = detectionResponse.data;
+                    const task = {
+                        id: taskData.task_id,
+                        status: taskData.status,
+                        message: taskData.message,
+                        created_time: new Date().toISOString(),
+                        progress: 0,
+                        command: command
+                    };
+                    setCurrentTask(task);
+                    setTasks(prev => [task, ...prev]);
+                    setSuccess('✅ 检测任务已启动');
+                    setDebugInfo('任务ID: ' + taskData.task_id);
+                    
+                    // 加入任务房间以接收实时日志
+                    joinTaskRoom(task.id);
+                    
+                    loadTasks();
+
+                } catch (err) {
+                    console.error('启动检测失败:', err);
+                    const errorMsg = '启动检测失败: ' + (err.response?.data?.error || err.message);
+                    setError(errorMsg);
+                    setDebugInfo('错误详情: ' + JSON.stringify(err.response?.data || err.message));
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1><i className="fas fa-shield-alt icon"></i> ASB</h1>
+                        <p>AI Security Benchmark - 智能体安全检测平台</p>
+                    </div>
+
+                    {error && (
+                        <div className="alert alert-error">
+                            <i className="fas fa-exclamation-triangle"></i> {error}
+                        </div>
+                    )}
+
+                    {success && (
+                        <div className="alert alert-success">
+                            <i className="fas fa-check-circle"></i> {success}
+                        </div>
+                    )}
+
+                    {debugInfo && (
+                        <div className="alert alert-info">
+                            <i className="fas fa-info-circle"></i> 调试信息: {debugInfo}
+                        </div>
+                    )}
+
+                    {generatedCommand && (
+                        <div className="card full-width">
+                            <h2><i className="fas fa-terminal icon"></i> 生成的命令行</h2>
+                            <div style={{ 
+                                background: '#1a1a1a', 
+                                color: '#00ff00', 
+                                padding: '20px', 
+                                borderRadius: '8px', 
+                                fontFamily: 'monospace',
+                                fontSize: '14px',
+                                lineHeight: '1.5',
+                                overflow: 'auto',
+                                border: '1px solid #333'
+                            }}>
+                                <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{generatedCommand}</pre>
+                            </div>
+                            <div style={{ marginTop: '15px' }}>
+                                <button 
+                                    className="btn btn-success"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(generatedCommand);
+                                        setSuccess('📋 命令行已复制到剪贴板');
+                                    }}
+                                >
+                                    <i className="fas fa-copy"></i> 复制命令
+                                </button>
+                                <button 
+                                    className="btn"
+                                    onClick={() => setGeneratedCommand(null)}
+                                >
+                                    <i className="fas fa-times"></i> 关闭
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 实时日志显示组件 */}
+                    {currentTask && currentTask.status === 'running' && (
+                        <div className="log-container">
+                            <div className="log-header">
+                                <div className="log-title">
+                                    <i className="fas fa-terminal"></i> 实时日志监控
+                                    <span style={{ 
+                                        marginLeft: '10px', 
+                                        fontSize: '12px', 
+                                        color: isConnected ? '#4facfe' : '#fa709a' 
+                                    }}>
+                                        {isConnected ? '🟢 已连接' : '🔴 未连接'}
+                                    </span>
+                                </div>
+                                <div className="log-controls">
+                                    <button className="log-btn" onClick={clearLogs}>
+                                        <i className="fas fa-trash"></i> 清空日志
+                                    </button>
+                                    <button 
+                                        className="log-btn danger" 
+                                        onClick={() => leaveTaskRoom(currentTask.id)}
+                                    >
+                                        <i className="fas fa-sign-out-alt"></i> 停止监控
+                                    </button>
+                                </div>
+                            </div>
+                            {/* 日志过滤选项 */}
+                            {modalMode === 'logs' && historicalLogs.length > 0 && (
+                                <div style={{ 
+                                    padding: '10px 20px', 
+                                    borderBottom: '1px solid var(--border-color)',
+                                    backgroundColor: 'var(--bg-secondary)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>过滤:</span>
+                                        {['all', 'error', 'warning', 'info', 'debug'].map(level => (
+                                            <button
+                                                key={level}
+                                                className={`log-filter-btn ${logFilter === level ? 'active' : ''}`}
+                                                onClick={() => setLogFilter(level)}
+                                                style={{
+                                                    padding: '4px 8px',
+                                                    fontSize: '11px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid var(--border-color)',
+                                                    backgroundColor: logFilter === level ? 'var(--primary-color)' : 'transparent',
+                                                    color: logFilter === level ? 'white' : 'var(--text-secondary)',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {level.toUpperCase()}
+                                            </button>
+                                        ))}
+                                        <span style={{ 
+                                            color: 'var(--text-secondary)', 
+                                            fontSize: '11px',
+                                            marginLeft: 'auto'
+                                        }}>
+                                            显示 {logFilter === 'all' ? (modalMode === 'logs' ? historicalLogs.length : logs.length) : (modalMode === 'logs' ? historicalLogs.filter(log => log.level === logFilter).length : logs.filter(log => log.level === logFilter).length)} 条
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <div className="log-content">
+                                {(modalMode === 'logs' ? historicalLogs : logs).length === 0 ? (
+                                    <div style={{ 
+                                        color: '#a0a0a0', 
+                                        textAlign: 'center', 
+                                        padding: '20px',
+                                        fontStyle: 'italic'
+                                    }}>
+                                        {modalMode === 'logs' ? '暂无历史日志数据' : '等待日志输出...'}
+                                    </div>
+                                ) : (
+                                    (modalMode === 'logs' ? historicalLogs : logs)
+                                        .filter(log => logFilter === 'all' || log.level === logFilter)
+                                        .map(log => (
+                                        <div key={log.id} className={`log-line ${log.level || 'info'}`}>
+                                            <span className="log-timestamp">
+                                                {new Date(log.timestamp).toLocaleTimeString()}
+                                            </span>
+                                            <span className="log-level">
+                                                [{log.level?.toUpperCase() || 'INFO'}]
+                                            </span>
+                                            <span className="log-message">
+                                                {log.message}
+                                            </span>
+                                        </div>
+                                    ))
+                                )}
+                                {(modalMode === 'logs' ? historicalLogs : logs).length > 0 && (
+                                    <div className="log-scroll-indicator">
+                                        共 {logFilter === 'all' ? (modalMode === 'logs' ? historicalLogs.length : logs.length) : (modalMode === 'logs' ? historicalLogs.filter(log => log.level === logFilter).length : logs.filter(log => log.level === logFilter).length)} 条日志
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="main-content">
+                    <div className="card">
+                        <h2><i className="fas fa-cog icon"></i> 检测配置</h2>
+                            
+                            <div className="form-group">
+                                <label><i className="fas fa-robot"></i> 选择智能体</label>
+                                <select 
+                                    className="form-control"
+                                    value={config.agent || ''}
+                                    onChange={(e) => updateConfig('agent', e.target.value)}
+                                >
+                                    <option value="">请选择智能体...</option>
+                                    {agents.map(agent => (
+                                        <option key={agent.name} value={agent.name}>
+                                            {agent.name} - {agent.path}
+                                        </option>
+                                    ))}
+                                </select>
+                                {agents.length === 0 && (
+                                    <small className="text-muted">正在加载智能体列表...</small>
+                                )}
+                            </div>
+
+                            <div className="form-group">
+                                <label><i className="fas fa-bug"></i> 注入方法</label>
+                                <select 
+                                    className="form-control"
+                                    value={config.injection_method}
+                                    onChange={(e) => updateConfig('injection_method', e.target.value)}
+                                >
+                                    <option value="observation_prompt_injection">observation_prompt_injection - 观察提示注入</option>
+                                    <option value="direct_prompt_injection">direct_prompt_injection - 直接提示注入</option>
+                                    <option value="memory_attack">memory_attack - 内存攻击</option>
+                                    <option value="clean">clean - 干净模式</option>
+                                    <option value="mixed_attack">mixed_attack - 混合攻击</option>
+                                    <option value="pot_backdoor">pot_backdoor - POT后门攻击</option>
+                                    <option value="pot_clean">pot_clean - POT干净模式</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label><i className="fas fa-tools"></i> 攻击工具类型</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={config.attack_tool.join(', ')}
+                                    onChange={(e) => updateArrayConfig('attack_tool', e.target.value)}
+                                    placeholder="all, agg, non-agg, test"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label><i className="fas fa-brain"></i> LLM模型</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={config.llms.join(', ')}
+                                    onChange={(e) => updateArrayConfig('llms', e.target.value)}
+                                    placeholder="llama3:8b, gpt-4o-mini"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label><i className="fas fa-crosshairs"></i> 攻击类型 (可多选)</label>
+                                <select
+                                    className="form-control"
+                                    multiple
+                                    size="5"
+                                    value={config.attack_types}
+                                    onChange={(e) => {
+                                        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                                        setConfig({...config, attack_types: selectedOptions});
+                                    }}
+                                >
+                                    <option value="context_ignoring">context_ignoring - 上下文忽略攻击</option>
+                                    <option value="fake_completion">fake_completion - 虚假完成攻击</option>
+                                    <option value="escape_characters">escape_characters - 转义字符攻击</option>
+                                    <option value="naive">naive - 朴素攻击</option>
+                                    <option value="combined_attack">combined_attack - 组合攻击</option>
+                                </select>
+                                <small className="form-text text-muted">
+                                    按住 Ctrl/Cmd 键可多选，已选择: {config.attack_types.length} 个
+                                    {config.attack_types.length > 0 && (
+                                        <span> - {config.attack_types.join(', ')}</span>
+                                    )}
+                                </small>
+                                <div className="mt-2">
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-sm btn-outline-primary me-2"
+                                        onClick={() => {
+                                            const allAttackTypes = ['context_ignoring', 'fake_completion', 'escape_characters', 'naive', 'combined_attack'];
+                                            setConfig({...config, attack_types: allAttackTypes});
+                                        }}
+                                    >
+                                        <i className="fas fa-check-square"></i> 全选
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => {
+                                            setConfig({...config, attack_types: []});
+                                        }}
+                                    >
+                                        <i className="fas fa-square"></i> 清空
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label><i className="fas fa-list-ol"></i> 任务数量</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    value={config.task_num}
+                                    onChange={(e) => updateConfig('task_num', parseInt(e.target.value))}
+                                    min="1"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label><i className="fas fa-shield"></i> 防御类型 (可选)</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={config.defense_type || ''}
+                                    onChange={(e) => updateConfig('defense_type', e.target.value || null)}
+                                    placeholder="ob_sandwich_defense, delimiters_defense"
+                                />
+                            </div>
+
+                            <div className="checkbox-group">
+                                <input
+                                    type="checkbox"
+                                    id="write_db"
+                                    checked={config.write_db}
+                                    onChange={(e) => updateConfig('write_db', e.target.checked)}
+                                />
+                                <label htmlFor="write_db"><i className="fas fa-database"></i> 写入数据库</label>
+                            </div>
+
+                            <div className="checkbox-group">
+                                <input
+                                    type="checkbox"
+                                    id="read_db"
+                                    checked={config.read_db}
+                                    onChange={(e) => updateConfig('read_db', e.target.checked)}
+                                />
+                                <label htmlFor="read_db"><i className="fas fa-database"></i> 读取数据库</label>
+                            </div>
+
+                            <button 
+                                className="btn" 
+                                onClick={startDetection}
+                                disabled={loading || (currentTask && currentTask.status === 'running')}
+                            >
+                                {loading ? <span className="loading"></span> : <i className="fas fa-play"></i>} 开始检测
+                            </button>
+
+                            <button 
+                                className="btn btn-success" 
+                                onClick={generateCommandFrontend}
+                                disabled={loading}
+                            >
+                                <i className="fas fa-terminal"></i> 生成命令行
+                            </button>
+
+                            {generatedCommand && (
+                                <button 
+                                    className="btn btn-warning" 
+                                    onClick={() => startCustomDetection(generatedCommand)}
+                                    disabled={loading}
+                                >
+                                    {loading ? <span className="loading"></span> : <i className="fas fa-rocket"></i>} 执行自定义命令
+                                </button>
+                            )}
+
+                            {currentTask && currentTask.status === 'running' && (
+                                <button 
+                                    className="btn btn-danger" 
+                                    onClick={cancelDetection}
+                                >
+                                    <i className="fas fa-stop"></i> 取消检测
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="card">
+                            <h2><i className="fas fa-chart-line icon"></i> 任务状态</h2>
+                            
+                            {currentTask ? (
+                                <div className="task-info">
+                                    <div className="task-info-item">
+                                        <span className="task-info-label">任务ID</span>
+                                        <span className="task-info-value">
+                                            <span className={`status-indicator status-${currentTask.status}`}></span>
+                                            {currentTask.id.substring(0, 8)}...
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="task-info-item">
+                                        <span className="task-info-label">状态</span>
+                                        <span className="task-info-value">{currentTask.status}</span>
+                                    </div>
+                                    
+                                    {currentTask.status === 'running' && (
+                                        <div className="progress-container">
+                                            <div className="progress-bar">
+                                                <div 
+                                                    className="progress-fill" 
+                                                    style={{ width: `${currentTask.progress || 0}%` }}
+                                                ></div>
+                                            </div>
+                                            <div style={{ textAlign: 'center', marginTop: '15px', color: 'var(--text-secondary)' }}>
+                                                <span className="loading"></span> 
+                                                {currentTask.current_step || '检测进行中...'} 
+                                                ({currentTask.progress || 0}%)
+                                            </div>
+                                            
+                                            {/* 实时日志显示 */}
+                                            {currentTask.logs && currentTask.logs.length > 0 && (
+                                                <div style={{ 
+                                                    marginTop: '20px', 
+                                                    backgroundColor: 'var(--bg-secondary)', 
+                                                    borderRadius: '8px', 
+                                                    padding: '15px',
+                                                    maxHeight: '200px',
+                                                    overflowY: 'auto',
+                                                    fontSize: '12px',
+                                                    fontFamily: 'monospace'
+                                                }}>
+                                                    <div style={{ 
+                                                        color: 'var(--text-secondary)', 
+                                                        marginBottom: '10px',
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        📋 实时日志:
+                                                    </div>
+                                                    {currentTask.logs.slice(-10).map((log, index) => (
+                                                        <div key={index} style={{ 
+                                                            marginBottom: '5px',
+                                                            color: 'var(--text-primary)',
+                                                            wordBreak: 'break-all'
+                                                        }}>
+                                                            <span style={{ color: 'var(--text-secondary)' }}>
+                                                                [{new Date(log.timestamp).toLocaleTimeString()}]
+                                                            </span> {log.message}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    
+                                    <div className="task-info-item">
+                                        <span className="task-info-label">创建时间</span>
+                                        <span className="task-info-value">{new Date(currentTask.created_time).toLocaleString()}</span>
+                                    </div>
+                                    
+                                    {currentTask.start_time && (
+                                        <div className="task-info-item">
+                                            <span className="task-info-label">开始时间</span>
+                                            <span className="task-info-value">{new Date(currentTask.start_time).toLocaleString()}</span>
+                                        </div>
+                                    )}
+                                    
+                                    {currentTask.end_time && (
+                                        <div className="task-info-item">
+                                            <span className="task-info-label">结束时间</span>
+                                            <span className="task-info-value">{new Date(currentTask.end_time).toLocaleString()}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="alert alert-info">
+                                    <i className="fas fa-info-circle"></i> 暂无运行中的任务
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {(() => {
+                        
+                        return results && results.summary && (
+                        <div id="detection-results" className="card full-width">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <h2><i className="fas fa-chart-bar icon"></i> 检测结果</h2>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button 
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => downloadFile(currentProgressTaskId, 'result')}
+                                        disabled={!currentProgressTaskId}
+                                    >
+                                        <i className="fas fa-download"></i> 下载结果文件
+                                    </button>
+                                    <button 
+                                        className="btn btn-secondary btn-sm"
+                                        onClick={() => viewTaskLogs(currentProgressTaskId)}
+                                    >
+                                        <i className="fas fa-file-alt"></i> 查看日志
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            
+                            <div className="stats-grid">
+                                <div className="stat-card">
+                                    <div className="stat-number">{results.summary.total_tests || 0}</div>
+                                    <div className="stat-label">总测试数</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-number">{results.summary.successful_attacks || 0}</div>
+                                    <div className="stat-label">成功攻击</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-number">{results.summary.failed_attacks || 0}</div>
+                                    <div className="stat-label">失败攻击</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-number">
+                                        {results.summary.total_tests > 0 
+                                            ? Math.round((results.summary.successful_attacks / results.summary.total_tests) * 100)
+                                            : 0}%
+                                    </div>
+                                    <div className="stat-label">攻击成功率</div>
+                                </div>
+                            </div>
+
+                            {results.data && results.data.length > 0 && (
+                                <table className="results-table">
+                                    <thead>
+                                        <tr>
+                                            <th><i className="fas fa-robot"></i> 智能体</th>
+                                            <th><i className="fas fa-tasks"></i> 任务</th>
+                                            <th><i className="fas fa-tools"></i> 攻击工具</th>
+                                            <th><i className="fas fa-check"></i> 攻击成功</th>
+                                            <th><i className="fas fa-check-circle"></i> 原始成功</th>
+                                            <th><i className="fas fa-comment"></i> 响应</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {results.data.map((row, index) => (
+                                            <tr key={index}>
+                                                <td>{row.agent_name || '-'}</td>
+                                                <td>{row.task || '-'}</td>
+                                                <td>{row.attack_tool || '-'}</td>
+                                                <td>
+                                                    <span className={`status-indicator ${row.attack_success ? 'status-completed' : 'status-failed'}`}></span>
+                                                    {row.attack_success ? '是' : '否'}
+                                                </td>
+                                                <td>
+                                                    <span className={`status-indicator ${row.original_success ? 'status-completed' : 'status-failed'}`}></span>
+                                                    {row.original_success ? '是' : '否'}
+                                                </td>
+                                                <td>{row.response ? row.response.substring(0, 100) + '...' : '-'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                        );
+                    })()}
+
+                    <div className="card full-width">
+                        <h2><i className="fas fa-history icon"></i> 任务历史</h2>
+                        
+                        {tasks.length > 0 ? (
+                            <table className="results-table">
+                                <thead>
+                                    <tr>
+                                        <th><i className="fas fa-hashtag"></i> 任务ID</th>
+                                        <th><i className="fas fa-info-circle"></i> 状态</th>
+                                        <th><i className="fas fa-calendar-plus"></i> 创建时间</th>
+                                        <th><i className="fas fa-play"></i> 开始时间</th>
+                                        <th><i className="fas fa-stop"></i> 结束时间</th>
+                                        <th><i className="fas fa-cog"></i> 操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tasks.map((task) => (
+                                        <tr key={task.id}>
+                                            <td>{task.id.substring(0, 8)}...</td>
+                                            <td>
+                                                <span className={`status-indicator status-${task.status}`}></span>
+                                                {task.status}
+                                            </td>
+                                            <td>{new Date(task.created_time).toLocaleString()}</td>
+                                            <td>{task.start_time ? new Date(task.start_time).toLocaleString() : '-'}</td>
+                                            <td>{task.end_time ? new Date(task.end_time).toLocaleString() : '-'}</td>
+                                            <td>
+                                                {task.status === 'completed' && (
+                                                    <div className="btn-group" role="group">
+                                                        <button 
+                                                            className="btn btn-success"
+                                                            onClick={() => loadTaskResult(task.id)}
+                                                        >
+                                                            <i className="fas fa-eye"></i> 查看结果
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {(task.status === 'running' || task.status === 'queued') && (
+                                                    <button 
+                                                        className="btn btn-primary"
+                                                        onClick={() => viewTaskProgress(task.id)}
+                                                    >
+                                                        <i className="fas fa-chart-line"></i> 查看进度
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div className="alert alert-info">
+                                <i className="fas fa-info-circle"></i> 暂无任务历史
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* 实时进度查看模态框 */}
+                    {showProgressModal && (
+                        <div className="modal-overlay">
+                            <div className="modal-content progress-modal">
+                                <div className="modal-header">
+                                    <h3>
+                                        <i className={`fas ${
+                                            modalMode === 'progress' ? 'fa-chart-line' : 
+                                            'fa-file-alt'
+                                        }`}></i> 
+                                        {modalMode === 'progress' ? '任务实时进度' : 
+                                         '任务日志查看'}
+                                    </h3>
+                                    <button className="modal-close" onClick={closeProgressModal}>
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="progress-info">
+                                        <p><strong>任务ID:</strong> {currentProgressTaskId}</p>
+                                        {modalMode === 'progress' ? (
+                                            <>
+                                                <p><strong>连接状态:</strong> 
+                                                    <span className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
+                                                        <i className={`fas fa-circle ${isConnected ? 'connected' : 'disconnected'}`}></i>
+                                                        {isConnected ? '已连接' : '未连接'}
+                                                    </span>
+                                                </p>
+                                                {currentProgressData && currentProgressData.task_command && (
+                                                    <div style={{ marginTop: '15px' }}>
+                                                        <p><strong>执行命令:</strong></p>
+                                                        <div style={{ 
+                                                            background: '#1a1a1a', 
+                                                            color: '#00ff00', 
+                                                            padding: '15px', 
+                                                            borderRadius: '8px', 
+                                                            fontFamily: 'monospace',
+                                                            fontSize: '12px',
+                                                            lineHeight: '1.4',
+                                                            overflow: 'auto',
+                                                            border: '1px solid #333',
+                                                            maxHeight: '200px',
+                                                            marginTop: '10px'
+                                                        }}>
+                                                            <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{currentProgressData.task_command}</pre>
+                                                        </div>
+                                                        <button 
+                                                            className="btn btn-success"
+                                                            style={{ marginTop: '10px', fontSize: '12px', padding: '8px 15px' }}
+                                                            onClick={() => {
+                                                        navigator.clipboard.writeText(currentProgressData.task_command);
+                                                        setSuccess('📋 命令已复制到剪贴板');
+                                                    }}
+                                                >
+                                                    <i className="fas fa-copy"></i> 复制命令
+                                                </button>
+                                            </div>
+                                        )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                                                    <button 
+                                                        className="btn btn-info btn-sm"
+                                                        onClick={() => downloadFile(currentProgressTaskId, 'log')}
+                                                        disabled={!currentProgressTaskId}
+                                                    >
+                                                        <i className="fas fa-download"></i> 下载日志文件
+                                                    </button>
+                                                </div>
+                                                {currentProgressData && (
+                                                    <>
+                                                        <p><strong>日志文件:</strong> {currentProgressData.log_file}</p>
+                                                        <p><strong>文件大小:</strong> {(currentProgressData.file_size / 1024).toFixed(2)} KB</p>
+                                                        <p><strong>最后修改:</strong> {currentProgressData.last_modified ? new Date(currentProgressData.last_modified).toLocaleString() : '未知'}</p>
+                                                    </>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="log-container">
+                                        <div className="log-header">
+                                            <h4><i className={`fas ${modalMode === 'progress' ? 'fa-terminal' : 'fa-file-alt'}`}></i> {modalMode === 'progress' ? '实时日志' : '日志内容'}</h4>
+                                            <div className="log-controls">
+                                                {modalMode === 'progress' && (
+                                                    <button 
+                                                        className="btn btn-secondary"
+                                                        onClick={() => setLogs([])}
+                                                    >
+                                                        <i className="fas fa-trash"></i> 清空日志
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="log-content" id="logContent">
+                                            {(modalMode === 'logs' ? historicalLogs : logs).length === 0 ? (
+                                                <div className="log-empty">
+                                                    <i className="fas fa-hourglass-half"></i>
+                                                    <p>{modalMode === 'logs' ? '暂无历史日志数据' : '等待日志输出...'}</p>
+                                                </div>
+                                            ) : (
+                                                (modalMode === 'logs' ? historicalLogs : logs).map((log, index) => (
+                                                    <div key={index} className="log-line">
+                                                        <span className="log-timestamp">
+                                                            {new Date(log.timestamp).toLocaleTimeString()}
+                                                        </span>
+                                                        <span className="log-text">{log.message}</span>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button className="btn btn-secondary" onClick={closeProgressModal}>
+                                        <i className="fas fa-times"></i> 关闭
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                </div>
+            );
+        };
+
+        ReactDOM.render(
+            <ErrorBoundary>
+                <AgentSecurityDetector />
+            </ErrorBoundary>, 
+            document.getElementById('root')
+        );
+    </script>
+</body>
+</html>
