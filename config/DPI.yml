@@ -1,0 +1,40 @@
+injection_method: direct_prompt_injection
+attack_tool:
+  #- test
+  # - agg
+  # - non-agg
+  - all
+
+write_db: false # true,false
+
+llms:
+  #- gpt-4o-mini
+  # - gpt-3.5-turbo
+  # - gpt-4o-2024-08-06
+  # - claude-3-5-sonnet-20240620
+  # - ollama/qwen2:72b
+  # - ollama/qwen2:7b
+  # - ollama/gemma2:9b
+  # - ollama/gemma2:27b
+  # - ollama/llama3:70b
+  # - ollama/llama3.1:70b
+  # - ollama/mixtral:8x7b
+  - ollama/llama3:8b
+  # - ollama/llama3.1:8b
+
+attack_types:
+  # - combined_attack
+  # - context_ignoring
+  - fake_completion
+  - escape_characters
+  - naive
+
+# backend / device settings for this run
+use_backend: ollama
+eval_device: cuda
+# keep as a JSON string to match arg parsing that expects json.loads
+max_gpu_memory: '{"0": "20GiB"}'
+
+# defense_type: dynamic_prompt_rewriting # delimiters_defense, direct_paraphrase_defense, instructional_prevention, dynamic_prompt_rewriting
+# suffix: test
+task_num: 10  # Process all tasks for each agent

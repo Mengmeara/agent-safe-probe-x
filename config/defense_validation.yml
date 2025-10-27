@@ -1,0 +1,36 @@
+# Defense validation configuration file
+injection_method: direct_prompt_injection
+attack_tool:
+  - all
+
+write_db: false
+read_db: false
+
+llms:
+  - ollama/llama3:8b
+  # You can add more models for comparative testing
+
+attack_types:
+  - combined_attack
+  - context_ignoring
+  - fake_completion
+  - escape_characters
+  - naive
+
+# Defense type configuration - test each defense type individually
+defense_types:
+  - null  # No defense baseline
+  - delimiters_defense
+  - instructional_prevention
+  - direct_paraphrase_defense
+  - dynamic_prompt_rewriting
+  - ob_sandwich_defense
+
+# Experimental settings
+task_num: 20  # Increase task count to obtain more reliable statistical results
+suffix: defense_validation
+use_backend: ollama
+eval_device: cuda
+max_gpu_memory: '{"0": "20GiB"}'
+
+

@@ -1,0 +1,22 @@
+injection_method: observation_prompt_injection
+attack_tool:
+  - all
+  # - agg
+  # - non-agg
+
+llms:
+  - ollama/llama3:8b
+  # - gpt-4o-mini
+  # - gpt-3.5-turbo
+  # - gpt-4o-2024-08-06
+  # - claude-3-5-sonnet-20240620
+
+attack_types:
+  - clean_opi  # New clean OPI type
+  # - context_ignoring
+  # - fake_completion
+  # - escape_characters
+  # - naive
+
+# defense_type: ob_sandwich_defense # delimiters_defense, ob_sandwich_defense, instructional_prevention
+# suffix: test
