@@ -3,11 +3,25 @@
 # All abstractions will be implemented here
 
 from .llm_classes.model_registry import MODEL_REGISTRY
-from .llm_classes.hf_native_llm import HfNativeLLM
+
+# Conditionally import HfNativeLLM to avoid requiring transformers
+try:
+    from .llm_classes.hf_native_llm import HfNativeLLM
+    HF_NATIVE_AVAILABLE = True
+except ImportError:
+    HF_NATIVE_AVAILABLE = False
+    HfNativeLLM = None
 
 # standard implementation of LLM methods
 from .llm_classes.ollama_llm import OllamaLLM
-from .llm_classes.vllm import vLLM
+
+# Conditionally import vLLM to avoid requiring transformers
+try:
+    from .llm_classes.vllm import vLLM
+    VLLM_AVAILABLE = True
+except ImportError:
+    VLLM_AVAILABLE = False
+    vLLM = None
 
 class LLMKernel:
     def __init__(self,
@@ -37,6 +51,11 @@ class LLMKernel:
                 )
 
             elif use_backend == "vllm":
+                if not VLLM_AVAILABLE:
+                    raise ImportError(
+                        "transformers module is required for vLLM. "
+                        "Please install transformers: pip install transformers"
+                    )
                 self.model = vLLM(
                     llm_name=llm_name,
                     max_gpu_memory=max_gpu_memory,
@@ -45,6 +64,11 @@ class LLMKernel:
                     log_mode=log_mode
                 )
             else: # use huggingface LLM without backend
+                if not HF_NATIVE_AVAILABLE:
+                    raise ImportError(
+                        "transformers module is required for HuggingFace models. "
+                        "Please install transformers: pip install transformers"
+                    )
                 self.model = HfNativeLLM(
                     llm_name=llm_name,
                     max_gpu_memory=max_gpu_memory,

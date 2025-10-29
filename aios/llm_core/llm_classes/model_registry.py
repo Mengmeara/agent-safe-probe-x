@@ -3,7 +3,14 @@
 from .gpt_llm import GPTLLM
 from .gemini_llm import GeminiLLM
 from .bed_rock import BedrockLLM
-from .claude_llm import ClaudeLLM
+
+# Conditionally import ClaudeLLM to avoid requiring anthropic module
+try:
+    from .claude_llm import ClaudeLLM
+    CLAUDE_AVAILABLE = True
+except ImportError:
+    CLAUDE_AVAILABLE = False
+    ClaudeLLM = None
 
 #used for closed LLM model registry
 MODEL_REGISTRY = {
@@ -19,8 +26,9 @@ MODEL_REGISTRY = {
     'gpt-4o': GPTLLM,
     'gpt-4o-2024-08-06': GPTLLM,
     'gpt-4o-mini': GPTLLM,
-
-    # claude
-    'claude-3-5-sonnet-20240620': ClaudeLLM,
-    'bedrock/anthropic.claude-3-haiku-20240307-v1:0': BedrockLLM
 }
+
+# Add Claude models only if available
+if CLAUDE_AVAILABLE:
+    MODEL_REGISTRY['claude-3-5-sonnet-20240620'] = ClaudeLLM
+    MODEL_REGISTRY['bedrock/anthropic.claude-3-haiku-20240307-v1:0'] = BedrockLLM

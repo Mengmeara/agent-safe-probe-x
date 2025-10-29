@@ -225,16 +225,35 @@ def main():
 
     if os.path.exists(args.database):
         try:
-            embedding_function = HuggingFaceEmbeddings(
-                model_name="all-MiniLM-L6-v2"
-            )
-            vector_db = Chroma(
-                persist_directory=args.database,
-                embedding_function=embedding_function
-            )
-            print(f"The database {args.database} has been created.")
-        except ValueError as e:
-            print(f"Error initializing Chroma for directory '{args.database}': {e}")
+            # Try using Ollama embeddings first (faster, local)
+            embedding_function = OllamaEmbeddings(model="llama3:8b")
+            print("Using Ollama embeddings for vector database.")
+        except Exception as e:
+            print(f"Failed to initialize Ollama embeddings: {e}")
+            try:
+                # Fallback to HuggingFace embeddings
+                embedding_function = HuggingFaceEmbeddings(
+                    model_name="all-MiniLM-L6-v2"
+                )
+                print("Using HuggingFace embeddings for vector database.")
+            except Exception as e2:
+                print(f"Failed to initialize HuggingFace embeddings: {e2}")
+                print("Vector database disabled.")
+                vector_db = None
+                embedding_function = None
+        
+        if embedding_function:
+            try:
+                vector_db = Chroma(
+                    persist_directory=args.database,
+                    embedding_function=embedding_function
+                )
+                print(f"The database {args.database} has been created.")
+            except ValueError as e:
+                print(f"Error initializing Chroma for directory '{args.database}': {e}")
+                vector_db = None
+        else:
+            vector_db = None
     else:
         print(f"The database {args.database} does not exist.")
         vector_db = None
@@ -386,20 +405,24 @@ def main():
                 res["messages"]
             ])
     print(f"Total number of attacks: {len(agent_tasks)}")
-    print(f"Number of successful attacks: {attack_succ}")
-    print(f'Number of workflow generation failures: {workflow_failure}')
-    # print(f'Number of tool calling success: {tool_call_success}')
-    print(f"Attack success rate: {attack_succ/len(agent_tasks)}")
-    print(f"Attack success rate excluding workflow failure cases: {attack_succ/(len(agent_tasks)-workflow_failure)}")
-    print(f'Number of original task success: {orgin_succ}')
-    print(f'Original task success rate: {orgin_succ/len(agent_tasks)}')
+    
+    if len(agent_tasks) == 0:
+        print("No tasks to execute. Please check your configuration.")
+    else:
+        print(f"Number of successful attacks: {attack_succ}")
+        print(f'Number of workflow generation failures: {workflow_failure}')
+        # print(f'Number of tool calling success: {tool_call_success}')
+        print(f"Attack success rate: {attack_succ/len(agent_tasks)}")
+        print(f"Attack success rate excluding workflow failure cases: {attack_succ/(len(agent_tasks)-workflow_failure)}")
+        print(f'Number of original task success: {orgin_succ}')
+        print(f'Original task success rate: {orgin_succ/len(agent_tasks)}')
 
-    print(f"Refuse judge success number: {refuse_cnt}")
-    print(f"Refuse judge success rate: {refuse_cnt/len(agent_tasks)}")
+        print(f"Refuse judge success number: {refuse_cnt}")
+        print(f"Refuse judge success rate: {refuse_cnt/len(agent_tasks)}")
 
-    if args.read_db:
-        print(f"Memory search success number: {memory_search_succ}")
-        print(f"Memory search success rate: {memory_search_succ/len(agent_tasks)}")
+        if args.read_db:
+            print(f"Memory search success number: {memory_search_succ}")
+            print(f"Memory search success rate: {memory_search_succ/len(agent_tasks)}")
 
 
     scheduler.stop()

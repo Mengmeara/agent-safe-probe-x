@@ -1,0 +1,63 @@
+Traceback (most recent call last):
+  File "/home/flowteam/zqy/agent-safe-probe-x/main_attacker.py", line 37, in <module>
+    from langchain_chroma import Chroma
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_chroma/__init__.py", line 1, in <module>
+    from langchain_chroma.vectorstores import Chroma
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_chroma/vectorstores.py", line 26, in <module>
+    from langchain_core.embeddings import Embeddings
+  File "<frozen importlib._bootstrap>", line 1229, in _handle_fromlist
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/embeddings/__init__.py", line 25, in __getattr__
+    result = import_attr(attr_name, module_name, __spec__.parent)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/_import_utils.py", line 36, in import_attr
+    module = import_module(f".{module_name}", package=package)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/embeddings/embeddings.py", line 5, in <module>
+    from langchain_core.runnables.config import run_in_executor
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/runnables/config.py", line 18, in <module>
+    from langchain_core.callbacks.manager import AsyncCallbackManager, CallbackManager
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/callbacks/manager.py", line 33, in <module>
+    from langchain_core.tracers.context import (
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/tracers/context.py", line 20, in <module>
+    from langchain_core.tracers.langchain import LangChainTracer
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/tracers/langchain.py", line 23, in <module>
+    from langchain_core.load import dumpd
+  File "<frozen importlib._bootstrap>", line 1229, in _handle_fromlist
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/load/__init__.py", line 30, in __getattr__
+    result = import_attr(attr_name, module_name, __spec__.parent)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/_import_utils.py", line 36, in import_attr
+    module = import_module(f".{module_name}", package=package)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/load/dump.py", line 10, in <module>
+    from langchain_core.outputs import ChatGeneration
+  File "<frozen importlib._bootstrap>", line 1229, in _handle_fromlist
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/outputs/__init__.py", line 60, in __getattr__
+    result = import_attr(attr_name, module_name, __spec__.parent)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/_import_utils.py", line 36, in import_attr
+    module = import_module(f".{module_name}", package=package)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/langchain_core/outputs/chat_generation.py", line 15, in <module>
+    class ChatGeneration(Generation):
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/pydantic/_internal/_model_construction.py", line 242, in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/pydantic/_internal/_model_construction.py", line 566, in set_model_fields
+    fields, class_vars = collect_model_fields(cls, config_wrapper, ns_resolver, typevars_map=typevars_map)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/pydantic/_internal/_fields.py", line 364, in collect_model_fields
+    field_info = FieldInfo_.from_annotated_attribute(ann_type, assigned_value, _source=AnnotationSource.CLASS)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/flowteam/miniconda3/envs/ASB/lib/python3.11/site-packages/pydantic/fields.py", line 353, in from_annotated_attribute
+    @staticmethod
+
+KeyboardInterrupt
