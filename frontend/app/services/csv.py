@@ -67,7 +67,8 @@ def get_csv_page(task_id: str, page: int = 1, per_page: int = 20) -> Tuple[Dict[
         end_idx = min(total, start_idx + per_page)
         df_page = df.iloc[start_idx:end_idx]
 
-        succ = int(df["attack_success"].sum()) if "attack_success" in df.columns else 0
+        succ_attack = int(df["attack_success"].sum()) if "attack_success" in df.columns else 0
+        succ_origin = int(df["original_success"].sum()) if "original_success" in df.columns else 0
 
         return {
             "task_id": task_id,
@@ -78,8 +79,10 @@ def get_csv_page(task_id: str, page: int = 1, per_page: int = 20) -> Tuple[Dict[
             "data": df_page.to_dict("records"),
             "summary": {
                 "total_tests": total,
-                "successful_attacks": succ,
-                "failed_attacks": total - succ,
+                "successful_attacks": succ_attack,
+                "failed_attacks": total - succ_attack,
+                "successful_original": succ_origin,
+                "failed_original": total - succ_origin,
             },
         }, 200
     except Exception as e:

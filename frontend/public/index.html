@@ -175,7 +175,7 @@ window.addEventListener('unhandledrejection', function(e) {
   console.error('未处理的Promise拒绝:', e.reason);
 });
 
-const { useState, useEffect, useCallback } = React;
+const { useState, useEffect, useCallback, useMemo } = React;
 // 统一的 axios 实例（支持返回 500 时也拿到响应体）
 const api = axios.create({
   baseURL: '', // 同域就留空
@@ -294,6 +294,7 @@ const AgentSecurityDetector = () => {
   const [agents, setAgents] = useState([]);
   const [attackTools, setAttackTools] = useState([]);
   const [results, setResults] = useState(null);
+  const [resultViewMode, setResultViewMode] = useState('origin'); // origin | attack
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -309,6 +310,23 @@ const AgentSecurityDetector = () => {
   const [modalMode, setModalMode] = useState('progress');
   const [logFilter, setLogFilter] = useState('all');
   const [historicalLogs, setHistoricalLogs] = useState([]);
+
+  const viewSummary = useMemo(() => {
+    if (!results || !results.summary) return null;
+    const s = results.summary;
+    const total = s.total_tests || 0;
+    if (resultViewMode === 'attack') {
+      const success = s.successful_attacks ?? 0;
+      const failed = s.failed_attacks ?? Math.max(0, total - success);
+      const rate = total ? Math.round((success / total) * 100) : 0;
+      return { total, success, failed, rate };
+    }
+    // origin (默认)
+    const success = s.successful_original ?? s.successful_attacks ?? 0;
+    const failed = s.failed_original ?? Math.max(0, total - success);
+    const rate = total ? Math.round((success / total) * 100) : 0;
+    return { total, success, failed, rate };
+  }, [results, resultViewMode]);
 
   // 同步 ref 和 state
   useEffect(() => {
@@ -545,13 +563,18 @@ const AgentSecurityDetector = () => {
     // 没有 summary 就自己算一个
     if (!resultData.summary && Array.isArray(resultData.data)) {
       const total = resultData.data.length;
-      const succ = resultData.data.filter(x => x.attack_success === true).length;
-      const fail = total - succ;
+      const succAttack = resultData.data.filter(x => x.attack_success === true).length;
+      const succOrigin = resultData.data.filter(x => x.original_success === true).length;
+      const failAttack = total - succAttack;
+      const failOrigin = total - succOrigin;
       resultData.summary = {
         total_tests: total,
-        successful_attacks: succ,
-        failed_attacks: fail,
-        success_rate: total > 0 ? Math.round((succ / total) * 100) : 0
+        successful_attacks: succAttack,
+        failed_attacks: failAttack,
+        success_rate: total > 0 ? Math.round((succAttack / total) * 100) : 0,
+        successful_original: succOrigin,
+        failed_original: failOrigin,
+        success_rate_original: total > 0 ? Math.round((succOrigin / total) * 100) : 0
       };
     }
 
@@ -979,11 +1002,27 @@ const AgentSecurityDetector = () => {
       </div>
 
       {/* 结果卡片 */}
-      {results && results.summary && (
+      {results && viewSummary && (
         <div id="detection-results" className="card full-width">
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px' }}>
             <h2><i className="fas fa-chart-bar icon"></i> 检测结果</h2>
             <div style={{ display:'flex', gap:'10px' }}>
+              <div className="btn-group" style={{ display:'flex', gap:'6px' }}>
+                <button
+                  className="btn btn-sm"
+                  style={{ opacity: resultViewMode === 'origin' ? 1 : 0.6 }}
+                  onClick={()=>setResultViewMode('origin')}
+                >
+                  攻击成功
+                </button>
+                <button
+                  className="btn btn-sm"
+                  style={{ opacity: resultViewMode === 'attack' ? 1 : 0.6 }}
+                  onClick={()=>setResultViewMode('attack')}
+                >
+                  防护成功
+                </button>
+              </div>
               <button className="btn btn-primary btn-sm" onClick={()=>downloadFile(currentProgressTaskId, 'result')} disabled={!currentProgressTaskId}>
                 <i className="fas fa-download"></i> 下载结果文件
               </button>
@@ -994,14 +1033,14 @@ const AgentSecurityDetector = () => {
           </div>
 
           <div className="stats-grid">
-            <div className="stat-card"><div className="stat-number">{results.summary.total_tests || 0}</div><div className="stat-label">总测试数</div></div>
-            <div className="stat-card"><div className="stat-number">{results.summary.successful_attacks || 0}</div><div className="stat-label">成功攻击</div></div>
-            <div className="stat-card"><div className="stat-number">{results.summary.failed_attacks || 0}</div><div className="stat-label">失败攻击</div></div>
+            <div className="stat-card"><div className="stat-number">{viewSummary.total}</div><div className="stat-label">总测试数</div></div>
+            <div className="stat-card"><div className="stat-number">{viewSummary.success}</div><div className="stat-label">{resultViewMode === 'attack' ? '成功攻击' : '原始成功'}</div></div>
+            <div className="stat-card"><div className="stat-number">{viewSummary.failed}</div><div className="stat-label">{resultViewMode === 'attack' ? '失败攻击' : '原始失败'}</div></div>
             <div className="stat-card">
               <div className="stat-number">
-                {results.summary.total_tests > 0 ? Math.round((results.summary.successful_attacks / results.summary.total_tests) * 100) : 0}%
+                {viewSummary.rate}%
               </div>
-              <div className="stat-label">攻击成功率</div>
+              <div className="stat-label">{resultViewMode === 'attack' ? '攻击成功率' : '原始成功率'}</div>
             </div>
           </div>
 
@@ -1012,8 +1051,8 @@ const AgentSecurityDetector = () => {
                   <th><i className="fas fa-robot"></i> 智能体</th>
                   <th><i className="fas fa-tasks"></i> 任务</th>
                   <th><i className="fas fa-tools"></i> 攻击工具</th>
-                  <th><i className="fas fa-check"></i> 攻击成功</th>
-                  <th><i className="fas fa-check-circle"></i> 原始成功</th>
+                  <th><i className="fas fa-check"></i> 防护成功</th>
+                  <th><i className="fas fa-check-circle"></i> 攻击成功</th>
                   <th><i className="fas fa-comment"></i> 响应</th>
                 </tr>
               </thead>

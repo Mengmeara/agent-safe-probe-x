@@ -97,12 +97,16 @@ def build_detection_result(task_id: str, attack: str | None):
         df = normalize_df(df)
 
         total = len(df)
-        succ = int(df["attack_success"].sum()) if "attack_success" in df.columns else 0
+        succ_attack = int(df["attack_success"].sum()) if "attack_success" in df.columns else 0
+        succ_origin = int(df["original_success"].sum()) if "original_success" in df.columns else 0
         summary = {
             "total_tests": total,
-            "successful_attacks": succ,
-            "failed_attacks": total - succ,
-            "success_rate": int(round((succ / total) * 100)) if total else 0,
+            "successful_attacks": succ_attack,
+            "failed_attacks": total - succ_attack,
+            "success_rate": int(round((succ_attack / total) * 100)) if total else 0,
+            "successful_original": succ_origin,
+            "failed_original": total - succ_origin,
+            "success_rate_original": int(round((succ_origin / total) * 100)) if total else 0,
         }
 
         # 统一输出记录（与原 server.py 对齐）

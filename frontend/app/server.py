@@ -296,8 +296,6 @@ def get_all_tasks():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-
-
 @app.route('/api/detection/progress/<task_id>', methods=['GET'])
 def get_task_progress(task_id):
     """获取任务实时进度信息"""
