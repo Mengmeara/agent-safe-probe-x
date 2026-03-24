@@ -1,18 +1,21 @@
-# frontend/app/core/path_utils.py
+# frontend/core/path_utils.py
 import os, sys
 
 # ---------- 路径基准 ----------
-# 当前文件: .../frontend/app/core/path_utils.py
+# 当前文件: .../frontend/core/path_utils.py
 CURRENT_FILE = os.path.abspath(__file__)
 
-# app 层目录: .../frontend/app
-APP_ROOT = os.path.dirname(os.path.dirname(CURRENT_FILE))
+# core 目录: .../frontend/core
+_CORE_DIR = os.path.dirname(CURRENT_FILE)
 
 # frontend 根目录: .../frontend
-FRONTEND_BASE = os.path.dirname(APP_ROOT)
+FRONTEND_BASE = os.path.dirname(_CORE_DIR)
 
 # 项目根目录: .../agent-safe-probe-x
 PROJECT_ROOT = os.path.dirname(FRONTEND_BASE)
+
+# app 层目录: .../frontend/app
+APP_ROOT = os.path.join(FRONTEND_BASE, "app")
 
 # 确保 frontend 和项目根都能被 import 到
 for p in (PROJECT_ROOT, FRONTEND_BASE):

@@ -8,6 +8,12 @@ def get_agents_payload():
     try:
         agents = [
             {
+                'name': 'external_api_agent',
+                'path': 'external_api',
+                'tasks': [],
+                'is_external': True
+            },
+            {
                 'name': 'academic_search_agent',
                 'path': 'example/academic_search_agent',
                 'tasks': [

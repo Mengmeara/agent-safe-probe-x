@@ -34,30 +34,30 @@
                              radial-gradient(circle at 80% 20%, rgba(139,92,246,0.25) 0%, transparent 50%),
                              radial-gradient(circle at 40% 40%, rgba(168,85,247,0.2) 0%, transparent 50%);
             min-height:100vh; color:var(--text-primary); overflow-x:hidden; }
-        .container { max-width:1400px; margin:0 auto; padding:20px; }
-        .header { text-align:center; margin-bottom:50px; position:relative; }
-        .header::before { content:''; position:absolute; top:-20px; left:50%; transform:translateX(-50%); width:120px; height:4px;
+        .container { max-width:1400px; margin:0 auto; padding:20px 30px; }
+        .header { text-align:center; margin-bottom:36px; position:relative; }
+        .header::before { content:''; position:absolute; top:-16px; left:50%; transform:translateX(-50%); width:100px; height:3px;
             background:var(--asp-x-gradient); border-radius:2px; box-shadow:0 0 10px var(--glow-color); }
-        .header h1 { font-size:3.5rem; font-weight:800; margin-bottom:15px; background:var(--asp-x-gradient);
+        .header h1 { font-size:2.8rem; font-weight:800; margin-bottom:10px; background:var(--asp-x-gradient);
             -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
             text-shadow:0 0 30px var(--glow-color); animation:glow 2s ease-in-out infinite alternate;
             letter-spacing:2px; }
-        .header .brand-acronym { font-size:2rem; color:#6366f1; font-weight:900; margin-right:10px; }
+        .header .brand-acronym { font-size:1.8rem; color:#6366f1; font-weight:900; margin-right:8px; }
         @keyframes glow { from { filter:drop-shadow(0 0 20px var(--glow-color));} to { filter:drop-shadow(0 0 30px var(--glow-color));} }
-        .header p { font-size:1.2rem; color:var(--text-secondary); font-weight:300; letter-spacing:1px;
-            margin-top:10px; }
-        .header .subtitle { font-size:0.95rem; color:var(--text-secondary); opacity:0.8; margin-top:5px;
+        .header p { font-size:1.1rem; color:var(--text-secondary); font-weight:300; letter-spacing:1px;
+            margin-top:6px; }
+        .header .subtitle { font-size:0.9rem; color:var(--text-secondary); opacity:0.8; margin-top:4px;
             font-style:italic; }
-        .main-content { display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-bottom:40px; }
-        .card { background:var(--card-bg); backdrop-filter:blur(20px); border:1px solid var(--border-color); border-radius:20px; padding:30px;
+        .main-content { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom:28px; }
+        .card { background:var(--card-bg); backdrop-filter:blur(20px); border:1px solid var(--border-color); border-radius:16px; padding:24px;
             box-shadow:var(--shadow); transition:all .3s cubic-bezier(.4,0,.2,1); position:relative; overflow:hidden; }
         .card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--asp-x-gradient); opacity:0; transition:opacity .3s; }
-        .card:hover{ transform:translateY(-8px); box-shadow:0 20px 40px rgba(0,0,0,.4); } .card:hover::before{ opacity:1; }
-        .card h2 { color:var(--text-primary); margin-bottom:25px; font-size:1.8rem; font-weight:600; display:flex; align-items:center; gap:12px; }
-        .form-group { margin-bottom:25px; }
-        .form-group label { display:block; margin-bottom:10px; font-weight:500; color:var(--text-primary); font-size:.95rem; }
-        .form-control { width:100%; padding:15px 20px; background:rgba(255,255,255,.05); border:1px solid var(--border-color); border-radius:12px;
-            font-size:14px; color:var(--text-primary); transition:all .3s ease; backdrop-filter:blur(10px); }
+        .card:hover{ transform:translateY(-4px); box-shadow:0 16px 36px rgba(0,0,0,.35); } .card:hover::before{ opacity:1; }
+        .card h2 { color:var(--text-primary); margin-bottom:18px; font-size:1.5rem; font-weight:600; display:flex; align-items:center; gap:10px; }
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; margin-bottom:6px; font-weight:500; color:var(--text-primary); font-size:.9rem; }
+        .form-control { width:100%; padding:12px 16px; background:rgba(255,255,255,.05); border:1px solid var(--border-color); border-radius:10px;
+            font-size:13px; color:var(--text-primary); transition:all .3s ease; backdrop-filter:blur(10px); }
         .form-control:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.2); background:rgba(255,255,255,.08); }
         .form-control::placeholder { color:var(--text-secondary); }
         select.form-control{appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 15px center;background-size:16px;padding-right:45px;cursor:pointer;}
@@ -77,18 +77,22 @@
         select.form-control[multiple] option:checked{background:rgba(99,102,241,.6); color:var(--text-primary); font-weight:600; border-color:rgba(99,102,241,.8); box-shadow:0 2px 8px rgba(99,102,241,.3);}
         select.form-control[multiple]::-webkit-scrollbar{width:8px;} select.form-control[multiple]::-webkit-scrollbar-track{background:rgba(255,255,255,.1); border-radius:4px;}
         select.form-control[multiple]::-webkit-scrollbar-thumb{background:rgba(99,102,241,.6); border-radius:4px;} select.form-control[multiple]::-webkit-scrollbar-thumb:hover{background:rgba(99,102,241,.8);}
-        .form-text{ color:var(--text-secondary); font-size:12px; margin-top:5px; display:block; }
+        .form-text{ color:var(--text-secondary); font-size:11px; margin-top:4px; display:block; }
         .form-text.text-muted{ color:var(--text-secondary); opacity:.8; }
+        .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .form-section{ border-top:1px solid var(--border-color); padding-top:14px; margin-top:6px; }
+        .form-section-label{ font-size:.8rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; font-weight:600; }
         .btn-sm{ padding:4px 8px; font-size:12px; border-radius:4px; transition:all .2s ease;}
         .btn-outline-primary{ color:#6366f1; border:1px solid #6366f1; background:transparent;} .btn-outline-primary:hover{ color:#fff; background:#6366f1; border-color:#6366f1; transform:translateY(-1px);}
         .btn-outline-secondary{ color:var(--text-secondary); border:1px solid var(--border-color); background:transparent;} .btn-outline-secondary:hover{ color:#fff; background:var(--text-secondary); border-color:var(--text-secondary); transform:translateY(-1px);}
         .me-2{ margin-right:8px;} .mt-2{ margin-top:8px;}
-        .btn{ background:var(--asp-x-gradient); color:#fff; border:none; padding:15px 30px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; transition:all .3s cubic-bezier(.4,0,.2,1); margin-right:15px; position:relative; overflow:hidden; text-transform:uppercase; letter-spacing:.5px; }
+        .btn{ background:var(--asp-x-gradient); color:#fff; border:none; padding:11px 22px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; transition:all .3s cubic-bezier(.4,0,.2,1); position:relative; overflow:hidden; text-transform:uppercase; letter-spacing:.5px; }
         .btn::before{ content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent); transition:left .5s; }
-        .btn:hover::before{ left:100%; } .btn:hover{ transform:translateY(-2px); box-shadow:0 10px 25px var(--glow-color);} .btn:active{ transform:translateY(0); } .btn:disabled{ opacity:.5; cursor:not-allowed; transform:none;}
+        .btn:hover::before{ left:100%; } .btn:hover{ transform:translateY(-2px); box-shadow:0 8px 20px var(--glow-color);} .btn:active{ transform:translateY(0); } .btn:disabled{ opacity:.5; cursor:not-allowed; transform:none;}
         .btn-danger{ background:var(--danger-gradient);} .btn-success{ background:var(--success-gradient);}
         .btn-primary{ background:var(--info-gradient);} .btn-secondary{ background:var(--secondary-gradient);}
         .btn-warning{ background:var(--warning-gradient);}
+        .btn-row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
         .status-indicator{ display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:8px; animation:pulse 2s infinite;}
         @keyframes pulse { 0%{opacity:1;} 50%{opacity:.5;} 100%{opacity:1;} }
         .status-queued{ background:linear-gradient(45deg,#fbbf24,#f59e0b);} .status-running{ background:linear-gradient(45deg,#3b82f6,#1d4ed8);}
@@ -100,10 +104,10 @@
         .progress-fill::after{ content:''; position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent); animation:shimmer 2s infinite;}
         @keyframes shimmer { 0%{ transform:translateX(-100%);} 100%{ transform:translateX(100%);} }
         .results-table{ width:100%; border-collapse:collapse; margin-top:25px; background:rgba(255,255,255,.02); border-radius:12px; overflow:hidden;}
-        .results-table th, .results-table td{ padding:15px; text-align:left; border-bottom:1px solid var(--border-color);}
-        .results-table th{ background:rgba(255,255,255,.05); font-weight:600; color:var(--text-primary); font-size:.9rem; text-transform:uppercase; letter-spacing:.5px;}
+        .results-table th, .results-table td{ padding:12px; text-align:left; border-bottom:1px solid var(--border-color);}
+        .results-table th{ background:rgba(255,255,255,.05); font-weight:600; color:var(--text-primary); font-size:.85rem; text-transform:uppercase; letter-spacing:.5px;}
         .results-table tr:hover{ background:rgba(255,255,255,.05);}
-        .alert{ padding:20px; border-radius:12px; margin:20px 0; border-left:4px solid; backdrop-filter:blur(10px); animation:slideIn .3s ease;}
+        .alert{ padding:14px 18px; border-radius:10px; margin:12px 0; border-left:4px solid; backdrop-filter:blur(10px); animation:slideIn .3s ease; font-size:.9rem; }
         @keyframes slideIn { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
         .alert-success{ background:rgba(16,185,129,.1); border-color:#10b981; color:#6ee7b7;}
         .alert-error{ background:rgba(239,68,68,.1); border-color:#ef4444; color:#fca5a5;}
@@ -111,18 +115,18 @@
         .loading{ display:inline-block; width:20px; height:20px; border:3px solid rgba(255,255,255,.3); border-top:3px solid #6366f1; border-radius:50%; animation:spin 1s linear infinite;}
         @keyframes spin { 0%{transform:rotate(0);} 100%{transform:rotate(360deg);} }
         .full-width{ grid-column:1 / -1; }
-        .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:25px; margin-bottom:30px;}
-        .stat-card{ background:var(--card-bg); backdrop-filter:blur(20px); padding:25px; border-radius:15px; text-align:center; border:1px solid var(--border-color); transition:all .3s ease; position:relative; overflow:hidden;}
+        .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:24px;}
+        .stat-card{ background:var(--card-bg); backdrop-filter:blur(20px); padding:20px; border-radius:12px; text-align:center; border:1px solid var(--border-color); transition:all .3s ease; position:relative; overflow:hidden;}
         .stat-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--asp-x-gradient);}
-        .stat-card:hover{ transform:translateY(-5px); box-shadow:0 15px 30px rgba(0,0,0,.3); }
-        .stat-number{ font-size:2.5rem; font-weight:800; background:var(--asp-x-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:8px; }
-        .stat-label{ color:var(--text-secondary); font-size:.9rem; font-weight:500; text-transform:uppercase; letter-spacing:.5px;}
-        .task-info{ background:rgba(255,255,255,.03); border-radius:12px; padding:20px; margin-bottom:20px;}
-        .task-info-item{ display:flex; justify-content:space-between; margin-bottom:10px; padding:8px 0; border-bottom:1px solid var(--border-color); }
+        .stat-card:hover{ transform:translateY(-3px); box-shadow:0 12px 24px rgba(0,0,0,.25); }
+        .stat-number{ font-size:2.2rem; font-weight:800; background:var(--asp-x-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:6px; }
+        .stat-label{ color:var(--text-secondary); font-size:.85rem; font-weight:500; text-transform:uppercase; letter-spacing:.5px;}
+        .task-info{ background:rgba(255,255,255,.03); border-radius:10px; padding:16px; margin-bottom:16px;}
+        .task-info-item{ display:flex; justify-content:space-between; margin-bottom:8px; padding:6px 0; border-bottom:1px solid var(--border-color); }
         .task-info-item:last-child{ border-bottom:none; margin-bottom:0; }
         .task-info-label{ font-weight:500; color:var(--text-secondary); }
         .task-info-value{ color:var(--text-primary); font-weight:600; }
-        .checkbox-group{ display:flex; align-items:center; gap:10px; margin-bottom:20px;}
+        .checkbox-group{ display:flex; align-items:center; gap:8px; margin-bottom:14px;}
         .checkbox-group input[type="checkbox"]{ width:18px; height:18px; accent-color:#6366f1; }
         .checkbox-group label{ margin-bottom:0; cursor:pointer; font-weight:500; }
         .icon{ font-size:1.2em; }
@@ -147,7 +151,7 @@
         .progress-info{ background:rgba(255,255,255,.05); border-radius:8px; padding:15px; margin-bottom:20px; } .progress-info p{ margin:5px 0; color:var(--text-primary);}
         .connection-status{ display:inline-flex; align-items:center; gap:5px; margin-left:10px;} .connection-status.connected{ color:#4facfe;} .connection-status.disconnected{ color:#fa709a;}
         .log-empty{ text-align:center; padding:40px 20px; color:var(--text-secondary);} .log-empty i{ font-size:24px; margin-bottom:10px; display:block;}
-        @media (max-width:768px){ .main-content{ grid-template-columns:1fr; gap:25px;} .header h1{ font-size:2.5rem;} .container{ padding:15px;} .log-container{ margin-top:15px; padding:15px;} .log-content{ min-height:150px; max-height:250px; } }
+        @media (max-width:768px){ .main-content{ grid-template-columns:1fr; gap:20px;} .header h1{ font-size:2rem;} .container{ padding:12px;} .log-container{ margin-top:12px; padding:12px;} .log-content{ min-height:150px; max-height:250px; } .form-row{ grid-template-columns:1fr; } .btn-row{ flex-direction:column; } }
         .file-info{ display:flex; align-items:center; gap:8px; max-width:200px;} .file-name{ flex:1; font-size:.9em; color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
         .file-info .btn{ padding:2px 6px; font-size:.8em; min-width:auto; }
         .text-success { color:#28a745 !important;} .text-info{ color:#17a2b8 !important;} .text-muted{ color:#6c757d !important;}
@@ -286,7 +290,15 @@ const AgentSecurityDetector = () => {
     task_num: 1,
     defense_type: null,
     write_db: false,
-    read_db: false
+    read_db: false,
+    api_endpoint: '',
+    api_key: '',
+    api_model: '',
+    custom_prompts: '',
+    injection_mode: 'opi',
+    max_turns: 3,
+    agent_persona: '',
+    agent_system_prompt: ''
   });
 
   const [currentTask, setCurrentTask] = useState(null);
@@ -310,6 +322,9 @@ const AgentSecurityDetector = () => {
   const [modalMode, setModalMode] = useState('progress');
   const [logFilter, setLogFilter] = useState('all');
   const [historicalLogs, setHistoricalLogs] = useState([]);
+  const [report, setReport] = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const viewSummary = useMemo(() => {
     if (!results || !results.summary) return null;
@@ -667,6 +682,33 @@ const AgentSecurityDetector = () => {
     }
   };
 
+  const viewReport = async (taskId) => {
+    if (!taskId) {
+      setError('当前没有可用的任务ID，无法生成报告');
+      return;
+    }
+    try {
+      setReportLoading(true);
+      setError(null);
+      const resp = await api.get(`/api/detection/report/${encodeURIComponent(taskId)}?t=${Date.now()}`, {
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      });
+      if (resp.status >= 400) {
+        const msg = extractErrorMessage(resp);
+        setError(`生成/获取报告失败（HTTP ${resp.status}）: ${msg}`);
+        return;
+      }
+      setReport(resp.data || null);
+      setShowReportModal(true);
+      setSuccess('📝 已生成智能体安全检测报告');
+    } catch (err) {
+      const msg = extractErrorMessage(err);
+      setError(`生成/获取报告失败: ${msg}`);
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
   const downloadFile = async (taskId, fileType) => {
     try {
       let fileName = '', apiEndpoint = '';
@@ -750,6 +792,49 @@ const AgentSecurityDetector = () => {
   };
 
   const generateCommandAndStart = async () => {
+    if (!config.agent) { setError('请先选择一个智能体'); return; }
+
+    // External API agent mode
+    const isExternal = agents.find(a => a.name === config.agent)?.is_external;
+    if (isExternal) {
+      if (!config.api_endpoint) { setError('请输入外部API地址'); return; }
+      setLoading(true); setError(null); setSuccess(null); setDebugInfo('正在启动外部API探测...');
+      try {
+        const requestData = {
+          agent: config.agent,
+          agent_type: 'external_api',
+          api_endpoint: config.api_endpoint,
+          api_key: config.api_key,
+          api_model: config.api_model,
+          custom_prompts: config.custom_prompts,
+          attack_types: config.attack_types.length > 0 ? config.attack_types : ['naive'],
+          llms: config.llms,
+          task_num: config.task_num,
+          injection_method: 'direct_prompt_injection',
+          injection_mode: config.injection_mode || 'opi',
+          max_turns: config.max_turns || 3,
+          agent_persona: config.agent_persona || '',
+          agent_system_prompt: config.agent_system_prompt || '',
+        };
+        const detectionResponse = await api.post('/api/detection/start', requestData);
+        const taskData = detectionResponse.data;
+        if (!taskData || !taskData.task_id) {
+          setError('启动检测失败：服务器未返回任务ID');
+          setDebugInfo('响应数据: ' + JSON.stringify(taskData));
+          return;
+        }
+        const task = { id: taskData.task_id, status: taskData.status, message: taskData.message, created_time: new Date().toISOString(), progress: 0 };
+        setCurrentTask(task); setSuccess('✅ 外部API探测任务已启动'); setDebugInfo('任务ID: ' + taskData.task_id);
+        joinTaskRoom(task.id); loadTasks();
+      } catch (err) {
+        const { msg, traceback, raw } = formatAxiosError(err);
+        setError(`启动检测失败：${msg}`);
+        setDebugInfo('错误详情: ' + (raw?.response?.data ? JSON.stringify(raw.response.data) : msg) + (traceback ? `\n${traceback}` : ''));
+      } finally { setLoading(false); }
+      return;
+    }
+
+    // Standard mode (original logic)
     if (!config.agent) { setError('请先选择一个智能体'); return; }
     setLoading(true); setError(null); setSuccess(null); setDebugInfo('正在生成命令行并启动检测...');
     try {
@@ -880,10 +965,76 @@ const AgentSecurityDetector = () => {
             <label><i className="fas fa-robot"></i> 选择智能体</label>
             <select className="form-control" value={config.agent || ''} onChange={(e)=>updateConfig('agent', e.target.value)}>
               <option value="">请选择智能体...</option>
-              {agents.map(agent => (<option key={agent.name} value={agent.name}>{agent.name} - {agent.path}</option>))}
+              {agents.map(agent => (<option key={agent.name} value={agent.name}>{agent.is_external ? '🌐 ' : ''}{agent.name}{agent.is_external ? ' - 外部API探测' : ` - ${agent.path}`}</option>))}
             </select>
             {agents.length===0 && <small className="text-muted">正在加载智能体列表...</small>}
           </div>
+
+          {/* ── External API Agent 配置 ── */}
+          {agents.find(a => a.name === config.agent)?.is_external && (
+            <div className="form-section">
+              <div className="form-section-label">外部 API 配置</div>
+              <div className="form-group">
+                <label><i className="fas fa-link"></i> API 地址</label>
+                <input type="text" className="form-control" value={config.api_endpoint} onChange={(e)=>updateConfig('api_endpoint', e.target.value)} placeholder="https://api.example.com/v1/chat/completions" />
+                <small className="form-text text-muted">OpenAI 兼容的 chat/completions 接口</small>
+              </div>
+              <div className="form-row">
+              <div className="form-group">
+                <label><i className="fas fa-key"></i> API Key</label>
+                <input type="password" className="form-control" value={config.api_key} onChange={(e)=>updateConfig('api_key', e.target.value)} placeholder="sk-..." />
+              </div>
+              <div className="form-group">
+                <label><i className="fas fa-cube"></i> 模型名称 (可选)</label>
+                <input type="text" className="form-control" value={config.api_model} onChange={(e)=>updateConfig('api_model', e.target.value)} placeholder="gpt-4o-mini" />
+              </div>
+              </div>
+              <div className="form-group">
+                <label><i className="fas fa-edit"></i> 自定义测试 Prompt (可选，每行一个)</label>
+                <textarea className="form-control" rows="3" value={config.custom_prompts} onChange={(e)=>updateConfig('custom_prompts', e.target.value)} placeholder="留空则使用内置通用测试任务&#10;例：帮我分析这份财务报告的风险" style={{resize:'vertical', fontFamily:'monospace', fontSize:'12px'}} />
+              </div>
+
+              <div className="form-section-label" style={{marginTop:'14px'}}>智能体探测设置</div>
+              <div className="form-row">
+              <div className="form-group">
+                <label><i className="fas fa-syringe"></i> 注入模式</label>
+                <select className="form-control" value={config.injection_mode} onChange={(e)=>updateConfig('injection_mode', e.target.value)}>
+                  <option value="opi">OPI - 观察注入 (推荐)</option>
+                  <option value="dpi">DPI - 直接注入 (基线)</option>
+                  <option value="dpi+opi">DPI+OPI - 组合攻击</option>
+                </select>
+                <small className="form-text text-muted">OPI 在工具返回中注入攻击，测试真正的智能体安全</small>
+              </div>
+              <div className="form-group">
+                <label><i className="fas fa-sync-alt"></i> 最大轮数: {config.max_turns}</label>
+                <input type="range" className="form-control" min="1" max="5" step="1" value={config.max_turns} onChange={(e)=>updateConfig('max_turns', parseInt(e.target.value))} style={{padding:'8px 0'}} />
+                <small className="form-text text-muted">多轮 ReAct 循环次数（1=单轮退化）</small>
+              </div>
+              </div>
+              <div className="form-group">
+                <label><i className="fas fa-user-secret"></i> 智能体人设</label>
+                <select className="form-control" value={config.agent_persona} onChange={(e)=>updateConfig('agent_persona', e.target.value)}>
+                  <option value="">自动 (Web 搜索助手)</option>
+                  <option value="web_search_assistant">Web 搜索助手</option>
+                  <option value="code_assistant">代码助手</option>
+                  <option value="data_analyst">数据分析师</option>
+                  <option value="financial_advisor">金融顾问</option>
+                  <option value="custom">自定义 System Prompt</option>
+                </select>
+                <small className="form-text text-muted">模拟的智能体角色，决定可用工具和系统提示</small>
+              </div>
+              {config.agent_persona === 'custom' && (
+              <div className="form-group">
+                <label><i className="fas fa-terminal"></i> 自定义 System Prompt</label>
+                <textarea className="form-control" rows="4" value={config.agent_system_prompt} onChange={(e)=>updateConfig('agent_system_prompt', e.target.value)} placeholder="You are a helpful assistant with access to the following tools..." style={{resize:'vertical', fontFamily:'monospace', fontSize:'12px'}} />
+              </div>
+              )}
+            </div>
+          )}
+
+          {/* ── 标准智能体配置（非外部API时显示） ── */}
+          {!agents.find(a => a.name === config.agent)?.is_external && (
+            <React.Fragment>
           <div className="form-group">
             <label><i className="fas fa-bug"></i> 注入方法</label>
             <select className="form-control" value={config.injection_method} onChange={(e)=>updateConfig('injection_method', e.target.value)}>
@@ -900,9 +1051,20 @@ const AgentSecurityDetector = () => {
             <label><i className="fas fa-tools"></i> 攻击工具类型</label>
             <input type="text" className="form-control" value={config.attack_tool.join(', ')} onChange={(e)=>updateArrayConfig('attack_tool', e.target.value)} placeholder="all, agg, non-agg, test" />
           </div>
+            </React.Fragment>
+          )}
+
+          {/* ── 共享配置（外部API和标准模式都显示） ── */}
+          <div className="form-section">
+          <div className="form-row">
           <div className="form-group">
-            <label><i className="fas fa-brain"></i> LLM模型</label>
-            <input type="text" className="form-control" value={config.llms.join(', ')} onChange={(e)=>updateArrayConfig('llms', e.target.value)} placeholder="llama3:8b, gpt-4o-mini" />
+            <label><i className="fas fa-brain"></i> LLM模型{agents.find(a => a.name === config.agent)?.is_external ? ' (评判模型)' : ''}</label>
+            <input type="text" className="form-control" value={config.llms.join(', ')} onChange={(e)=>updateArrayConfig('llms', e.target.value)} placeholder="llama3:8b" />
+          </div>
+          <div className="form-group">
+            <label><i className="fas fa-list-ol"></i> 任务数量</label>
+            <input type="number" className="form-control" value={config.task_num} onChange={(e)=>updateConfig('task_num', parseInt(e.target.value))} min="1" />
+          </div>
           </div>
           <div className="form-group">
             <label><i className="fas fa-crosshairs"></i> 攻击类型 (可多选)</label>
@@ -923,10 +1085,11 @@ const AgentSecurityDetector = () => {
               </button>
             </div>
           </div>
-          <div className="form-group">
-            <label><i className="fas fa-list-ol"></i> 任务数量</label>
-            <input type="number" className="form-control" value={config.task_num} onChange={(e)=>updateConfig('task_num', parseInt(e.target.value))} min="1" />
           </div>
+
+          {/* ── 标准模式专属选项 ── */}
+          {!agents.find(a => a.name === config.agent)?.is_external && (
+            <React.Fragment>
           <div className="form-group">
             <label><i className="fas fa-shield"></i> 防御类型 (可选)</label>
             <input type="text" className="form-control" value={config.defense_type || ''} onChange={(e)=>updateConfig('defense_type', e.target.value || null)} placeholder="ob_sandwich_defense, delimiters_defense" />
@@ -939,9 +1102,15 @@ const AgentSecurityDetector = () => {
             <input type="checkbox" id="read_db" checked={config.read_db} onChange={(e)=>updateConfig('read_db', e.target.checked)} />
             <label htmlFor="read_db"><i className="fas fa-database"></i> 读取数据库</label>
           </div>
+            </React.Fragment>
+          )}
+
+          <div className="btn-row">
           <button className="btn" onClick={startDetection} disabled={loading || (currentTask && currentTask.status==='running')}>
-            {loading ? <span className="loading"></span> : <i className="fas fa-play"></i>} 开始检测
+            {loading ? <span className="loading"></span> : <i className="fas fa-play"></i>} {agents.find(a => a.name === config.agent)?.is_external ? '开始探测' : '开始检测'}
           </button>
+          {!agents.find(a => a.name === config.agent)?.is_external && (
+            <React.Fragment>
           <button className="btn btn-success" onClick={generateCommandFrontend} disabled={loading}>
             <i className="fas fa-terminal"></i> 生成命令行
           </button>
@@ -950,9 +1119,12 @@ const AgentSecurityDetector = () => {
               {loading ? <span className="loading"></span> : <i className="fas fa-rocket"></i>} 执行自定义命令
             </button>
           )}
+            </React.Fragment>
+          )}
           {currentTask && currentTask.status==='running' && (
             <button className="btn btn-danger" onClick={cancelDetection}><i className="fas fa-stop"></i> 取消检测</button>
           )}
+          </div>
         </div>
 
         <div className="card">
@@ -1004,9 +1176,9 @@ const AgentSecurityDetector = () => {
       {/* 结果卡片 */}
       {results && viewSummary && (
         <div id="detection-results" className="card full-width">
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px' }}>
-            <h2><i className="fas fa-chart-bar icon"></i> 检测结果</h2>
-            <div style={{ display:'flex', gap:'10px' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px', flexWrap:'wrap', gap:'10px' }}>
+            <h2 style={{margin:0}}><i className="fas fa-chart-bar icon"></i> 检测结果</h2>
+            <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
               <div className="btn-group" style={{ display:'flex', gap:'6px' }}>
                 <button
                   className="btn btn-sm"
@@ -1028,6 +1200,19 @@ const AgentSecurityDetector = () => {
               </button>
               <button className="btn btn-secondary btn-sm" onClick={()=>viewTaskLogs(currentProgressTaskId)}>
                 <i className="fas fa-file-alt"></i> 查看日志
+              </button>
+              <button
+                className="btn btn-info btn-sm"
+                onClick={()=>viewReport(currentProgressTaskId)}
+                disabled={!currentProgressTaskId || reportLoading}
+              >
+                {reportLoading ? (
+                  <span className="loading" style={{ width:14, height:14 }}></span>
+                ) : (
+                  <>
+                    <i className="fas fa-shield-alt"></i> 查看报告
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -1181,6 +1366,34 @@ const AgentSecurityDetector = () => {
               </div>
             </div>
             <div className="modal-footer"><button className="btn btn-secondary" onClick={closeProgressModal}><i className="fas fa-times"></i> 关闭</button></div>
+          </div>
+        </div>
+      )}
+
+      {/* 智能体安全检测报告 模态框 */}
+      {showReportModal && report && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3><i className="fas fa-shield-alt"></i> 智能体安全检测报告</h3>
+              <button className="modal-close" onClick={() => setShowReportModal(false)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p><strong>任务ID:</strong> {report.task_id}</p>
+              {report.model && (
+                <p><strong>生成模型:</strong> {report.model}</p>
+              )}
+              <div style={{ marginTop:'15px', whiteSpace:'pre-wrap', fontFamily:'monospace', fontSize:'13px' }}>
+                {report.report || '暂无报告内容'}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowReportModal(false)}>
+                <i className="fas fa-times"></i> 关闭
+              </button>
+            </div>
           </div>
         </div>
       )}

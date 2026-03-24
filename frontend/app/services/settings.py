@@ -29,6 +29,34 @@ def validate_settings_payload(settings: Dict[str, Any] | None) -> Tuple[Dict[str
     """校验配置字段是否齐全；返回 (payload, http_code)"""
     try:
         data = settings or {}
+
+        # External API mode: relaxed validation
+        if data.get("agent_type") == "external_api":
+            if not data.get("api_endpoint"):
+                return {"valid": False, "error": "外部API模式需要提供 api_endpoint"}, 400
+            if not isinstance(data.get("attack_types", []), (list, tuple)) or not data.get("attack_types"):
+                return {"valid": False, "error": "attack_types 必须为非空列表"}, 400
+            if "task_num" in data:
+                try:
+                    n = int(data["task_num"])
+                    if n <= 0:
+                        return {"valid": False, "error": "task_num 必须为正整数"}, 400
+                except Exception:
+                    return {"valid": False, "error": "task_num 必须为整数"}, 400
+            # 多轮探测参数验证
+            injection_mode = data.get("injection_mode", "opi")
+            if injection_mode not in ("dpi", "opi", "dpi+opi"):
+                return {"valid": False, "error": "injection_mode 必须为 dpi, opi 或 dpi+opi"}, 400
+            if "max_turns" in data:
+                try:
+                    mt = int(data["max_turns"])
+                    if mt < 1 or mt > 10:
+                        return {"valid": False, "error": "max_turns 必须在 1-10 之间"}, 400
+                except (ValueError, TypeError):
+                    return {"valid": False, "error": "max_turns 必须为整数"}, 400
+            return {"valid": True}, 200
+
+        # Standard mode
         required = ["injection_method", "attack_tool", "llms", "attack_types"]
         for f in required:
             if f not in data:
@@ -55,6 +83,19 @@ def validate_settings_payload(settings: Dict[str, Any] | None) -> Tuple[Dict[str
 def merge_with_defaults(user_settings: Dict[str, Any] | None) -> Dict[str, Any]:
     """将用户配置与默认值合并（attack_tool 强制默认）"""
     defaults = load_default_settings()
-    merged = {**defaults, **(user_settings or {})}
+    us = user_settings or {}
+
+    # External API mode: preserve API-specific fields, apply minimal defaults
+    if us.get("agent_type") == "external_api":
+        merged = {**defaults, **us}
+        merged["injection_method"] = "direct_prompt_injection"
+        # Preserve API fields from user input
+        for key in ("agent_type", "api_endpoint", "api_key", "api_model", "custom_prompts",
+                    "injection_mode", "max_turns", "agent_persona", "agent_system_prompt"):
+            if key in us:
+                merged[key] = us[key]
+        return merged
+
+    merged = {**defaults, **us}
     merged["attack_tool"] = defaults["attack_tool"]
     return merged

@@ -30,7 +30,8 @@ def ensure_schema():
         llm_name TEXT,
         attack_types TEXT,
         timestamp TEXT,
-        updated_at TEXT
+        updated_at TEXT,
+        report TEXT
     )
     """)
 
@@ -71,6 +72,7 @@ def ensure_schema():
         'llm_name': "ALTER TABLE tasks ADD COLUMN llm_name TEXT",
         'attack_types': "ALTER TABLE tasks ADD COLUMN attack_types TEXT",
         'timestamp': "ALTER TABLE tasks ADD COLUMN timestamp TEXT",
+        'report': "ALTER TABLE tasks ADD COLUMN report TEXT",
     }
     for col, ddl in need.items():
         if col not in cols:

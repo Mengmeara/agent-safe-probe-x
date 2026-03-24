@@ -1,9 +1,9 @@
 # app/services/execution.py
-import os, threading, subprocess, sqlite3
+import os, threading, subprocess, sqlite3, shlex, base64
 from datetime import datetime
 
 from core.progress_tracker import ProgressTracker
-from core.path_utils import build_paths
+from core.path_utils import build_paths, PROJECT_ROOT
 from app.services.db import (
     DB_PATH, mark_task_status, mark_run_status, update_task_in_db
 )
@@ -77,28 +77,77 @@ def run_detection_task(task_id: str, config_data: dict, ts: str):
             res_csv, log_file = build_paths(injection_method, llm_name, atk, ts)
             os.makedirs(os.path.dirname(res_csv), exist_ok=True)
 
-            # 构造命令（保持你的环境）
-            cmd = [
-                "bash", "-lc",
-                (
-                    f"cd /home/flowteam/zqy/agent-safe-probe-x && "
-                    f"source /home/flowteam/miniconda3/etc/profile.d/conda.sh && "
-                    f"conda activate ASB && "
-                    f"python main_attacker.py "
-                    f"--llm_name ollama/{llm_name} "
-                    f"--attack_type {atk} "
-                    f"--use_backend ollama "
-                    f"--attacker_tools_path data/all_attack_tools.jsonl "
-                    f"--tasks_path data/agent_task_pot.jsonl "
-                    f"--task_num {task_num} "
-                    f"--single_agent {agent} "
-                    f"--workflow_mode manual "
-                    f"--single "
-                    f"--timestamp {ts} "
-                    f"--{injection_method} "
-                    f"--res_file {res_csv}"
-                )
-            ]
+            # 构造命令
+            agent_type = config_data.get('agent_type')
+
+            if agent_type == 'external_api':
+                # ── External API Probe 模式（多轮智能体安全探测）──
+                api_endpoint = config_data.get('api_endpoint', '')
+                api_key = config_data.get('api_key', '')
+                api_model = config_data.get('api_model', '')
+                custom_prompts = config_data.get('custom_prompts', '')
+                judge_model = llm_name.replace('ollama/', '') if llm_name.startswith('ollama/') else llm_name
+
+                # 多轮探测参数
+                injection_mode = config_data.get('injection_mode', 'opi')
+                max_turns = int(config_data.get('max_turns', 3))
+                agent_persona = config_data.get('agent_persona', '')
+                agent_system_prompt = config_data.get('agent_system_prompt', '')
+
+                prompts_b64 = ''
+                if custom_prompts:
+                    prompts_b64 = base64.b64encode(custom_prompts.encode('utf-8')).decode('utf-8')
+
+                system_prompt_b64 = ''
+                if agent_system_prompt:
+                    system_prompt_b64 = base64.b64encode(agent_system_prompt.encode('utf-8')).decode('utf-8')
+
+                cmd = [
+                    "bash", "-lc",
+                    (
+                        f"cd {PROJECT_ROOT} && "
+                        f"source /home/flowteam/miniconda3/etc/profile.d/conda.sh && "
+                        f"conda activate ASB && "
+                        f"python main_api_probe.py "
+                        f"--api_endpoint {shlex.quote(api_endpoint)} "
+                        f"--api_key {shlex.quote(api_key)} "
+                        f"{'--api_model ' + shlex.quote(api_model) + ' ' if api_model else ''}"
+                        f"--attack_types {shlex.quote(atk)} "
+                        f"--task_num {task_num} "
+                        f"--judge_model {shlex.quote(judge_model)} "
+                        f"--injection_mode {shlex.quote(injection_mode)} "
+                        f"--max_turns {max_turns} "
+                        f"{'--persona ' + shlex.quote(agent_persona) + ' ' if agent_persona else ''}"
+                        f"{'--system_prompt_b64 ' + system_prompt_b64 + ' ' if system_prompt_b64 else ''}"
+                        f"--timestamp {ts} "
+                        f"--single "
+                        f"--res_file {res_csv} "
+                        f"{'--custom_prompts_b64 ' + prompts_b64 + ' ' if prompts_b64 else ''}"
+                    )
+                ]
+            else:
+                # ── 标准 main_attacker.py 模式 ──
+                cmd = [
+                    "bash", "-lc",
+                    (
+                        f"cd {PROJECT_ROOT} && "
+                        f"source /home/flowteam/miniconda3/etc/profile.d/conda.sh && "
+                        f"conda activate ASB && "
+                        f"python main_attacker.py "
+                        f"--llm_name ollama/{llm_name} "
+                        f"--attack_type {atk} "
+                        f"--use_backend ollama "
+                        f"--attacker_tools_path data/all_attack_tools.jsonl "
+                        f"--tasks_path data/agent_task_pot.jsonl "
+                        f"--task_num {task_num} "
+                        f"--single_agent {agent} "
+                        f"--workflow_mode manual "
+                        f"--single "
+                        f"--timestamp {ts} "
+                        f"--{injection_method} "
+                        f"--res_file {res_csv}"
+                    )
+                ]
 
             # 启动子进程（直连 stdout/stderr）
             proc = subprocess.Popen(
@@ -150,16 +199,42 @@ def run_detection_task(task_id: str, config_data: dict, ts: str):
                         'timestamp': datetime.now().isoformat()
                     }, room=task_id)
 
-        # —— 所有 attack 完成：收尾 ——
+        # —— 所有 attack 完成：根据 detection_runs 状态汇总任务结果 ——
         end_ts = datetime.now().isoformat()
+
+        # 统计 detection_runs 中该任务的状态，避免所有子任务失败但总任务仍标记为 completed
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute(
+                "SELECT status FROM detection_runs WHERE task_id=?",
+                (task_id,)
+            )
+            rows = c.fetchall()
+            conn.close()
+            statuses = [ (r[0] or '').lower() for r in rows ] if rows else []
+        except Exception:
+            statuses = []
+
+        has_success = any(s == 'completed' for s in statuses)
+        has_failed  = any(s == 'failed' for s in statuses)
+
+        final_status = 'completed' if has_success else ('failed' if has_failed else 'completed')
+
         if task_id in running_tasks:
-            running_tasks[task_id]['status'] = 'completed'
+            running_tasks[task_id]['status'] = final_status
             running_tasks[task_id]['end_time'] = end_ts
             running_tasks[task_id]['progress'] = 100
-            running_tasks[task_id]['current_step'] = '检测完成'
-        mark_task_status(task_id, status='completed', end=end_ts, progress=100)
+            running_tasks[task_id]['current_step'] = '检测完成' if final_status == 'completed' else '任务失败'
 
-        payload = {'task_id': task_id, 'status': 'completed', 'progress': 100, 'timestamp': end_ts}
+        mark_task_status(task_id, status=final_status, end=end_ts, progress=100)
+
+        payload = {
+            'task_id': task_id,
+            'status': final_status,
+            'progress': 100,
+            'timestamp': end_ts
+        }
         if _socketio:
             _socketio.emit('task_status', payload, room=task_id)
             _socketio.emit('task_complete', payload, room=task_id)

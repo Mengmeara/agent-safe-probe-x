@@ -85,9 +85,51 @@ class ReactAgentAttack(BaseAgent):
         Returns:
             str: Instruction to use previous similar workflow, or None if no match found
         """
+        # Check if vectorstore is available
+        if self.vectorstore is None:
+            print("WARNING: Vector database is not available. Cannot search memory.")
+            return None
+        
         # Build search query with task and available tools
         self.memory_search = self.task_input + f'; {json.dumps(self.tools)}'
-        memory = self.vectorstore.similarity_search_with_score(self.memory_search)
+        try:
+            memory = self.vectorstore.similarity_search_with_score(self.memory_search)
+        except Exception as e:
+            error_msg = str(e)
+            if "dimension" in error_msg.lower() or "embedding" in error_msg.lower():
+                print(f"ERROR: Embedding dimension mismatch during query: {error_msg}")
+                # Try to get database path
+                db_path = None
+                if hasattr(self.vectorstore, '_persist_directory'):
+                    db_path = self.vectorstore._persist_directory
+                elif hasattr(self.args, 'database'):
+                    db_path = self.args.database
+                elif hasattr(self.vectorstore, '_collection') and hasattr(self.vectorstore._collection, '_client'):
+                    try:
+                        db_path = self.vectorstore._collection._client._settings.persist_directory
+                    except:
+                        pass
+                
+                print(f"Database path: {db_path if db_path else 'unknown'}")
+                print("Attempting to fix by recreating database with current embedding model...")
+                
+                # Try to recreate the database
+                if db_path and os.path.exists(db_path):
+                    try:
+                        import shutil
+                        print(f"Deleting old database at '{db_path}'...")
+                        shutil.rmtree(db_path)
+                        print(f"Old database deleted. Please restart the program to recreate it.")
+                    except Exception as cleanup_error:
+                        print(f"Failed to delete database: {cleanup_error}")
+                        print(f"Please manually delete the database directory: {db_path}")
+                else:
+                    print("Could not determine database path. Please check your configuration.")
+                
+                return None
+            else:
+                # Re-raise if it's not a dimension error
+                raise
 
         if len(memory) == 0:
             return None
@@ -125,21 +167,43 @@ class ReactAgentAttack(BaseAgent):
         
         for i, tool_call in enumerate(tool_calls):
             try:
-                function_name = tool_call["name"]
+                # Handle different tool_call formats
+                if isinstance(tool_call, dict):
+                    # Try different possible key names
+                    function_name = tool_call.get("name") or tool_call.get("function", {}).get("name")
+                    if not function_name:
+                        # Try to extract from function field if it's a string
+                        if "function" in tool_call and isinstance(tool_call["function"], str):
+                            function_name = tool_call["function"]
+                        else:
+                            raise KeyError("'name' - The required key is missing in the tool_call or tool_list.")
+                else:
+                    raise ValueError(f"Invalid tool_call format: {tool_call}")
+                
+                if function_name not in self.tool_list:
+                    raise KeyError(f"Tool '{function_name}' not found in tool_list. Available tools: {list(self.tool_list.keys())}")
+                
                 function_to_call = self.tool_list[function_name]
                 function_params = None
                 self.logger.log(f"The current tool called is {function_to_call}, parameter:{function_params}\n", level="info")
 
             except KeyError as e:
-                print(f"KeyError: {e} - The required key is missing in the tool_call or tool_list.")
+                error_msg = str(e)
+                print(f"KeyError: {error_msg}", flush=True)
+                if "name" in error_msg:
+                    print(f"DEBUG: tool_call structure: {tool_call}", flush=True)
+                    print(f"DEBUG: Available tools: {list(self.tool_list.keys())}", flush=True)
                 actions.append("I fail to call any tools.")
                 observations.append("The function name or the tool parameter is invalid.")
                 success = False
+                continue  # Skip to next tool_call
             except Exception as e:
-                print(f"Unexpected error: {e}")
+                print(f"Unexpected error processing tool_call: {e}", flush=True)
+                print(f"DEBUG: tool_call: {tool_call}", flush=True)
                 actions.append("I fail to call any tools.")
                 observations.append("The function name or the tool parameter is invalid.")
                 success = False
+                continue  # Skip to next tool_call
 
             try:
                 function_response = function_to_call.run(function_params)
@@ -269,7 +333,7 @@ class ReactAgentAttack(BaseAgent):
 
         if workflow:
             # Inject attacker tools into each workflow stage
-            if self.args.observation_prompt_injection or self.args.direct_prompt_injection:
+            if self.args.observation_prompt_injection or self.args.direct_prompt_injection or self.args.memory_attack:
                 workflow = self.attacker_tool_injection(workflow)
 
 

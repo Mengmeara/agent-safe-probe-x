@@ -11,11 +11,16 @@ License: MIT
 """
 import sys
 import io
+import os
 
-# Configure UTF-8 encoding for Windows
+# Configure UTF-8 encoding for Windows and set unbuffered output
 if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+else:
+    # Set unbuffered output for better real-time display on Linux/Mac
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buffering=1)  # Line buffered
+    sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', buffering=1)  # Line buffered
 
 from aios.scheduler.fifo_scheduler import FIFOScheduler
 from aios.utils.utils import (
@@ -248,15 +253,123 @@ def main():
                     persist_directory=args.database,
                     embedding_function=embedding_function
                 )
-                print(f"The database {args.database} has been created.")
-            except ValueError as e:
-                print(f"Error initializing Chroma for directory '{args.database}': {e}")
-                vector_db = None
+                # Check embedding dimensions by inspecting the collection
+                try:
+                    import shutil
+                    # Get the current embedding dimension
+                    test_embedding = embedding_function.embed_query("test")
+                    current_dim = len(test_embedding)
+                    
+                    # Check if collection exists and get its dimension
+                    collection = vector_db._collection
+                    if collection is not None:
+                        # Try to get collection metadata or check dimension
+                        try:
+                            # Get a sample from collection to check dimension
+                            if collection.count() > 0:
+                                # Try a test query to verify dimensions match
+                                test_query = "test"
+                                vector_db.similarity_search_with_score(test_query, k=1)
+                            print(f"The database {args.database} has been loaded and verified (embedding dim: {current_dim}).")
+                        except Exception as test_error:
+                            error_msg = str(test_error)
+                            if "dimension" in error_msg.lower() or "embedding" in error_msg.lower():
+                                print(f"Embedding dimension mismatch detected: {error_msg}")
+                                print(f"Current embedding dimension: {current_dim}")
+                                print(f"Deleting old database at '{args.database}' and recreating...")
+                                shutil.rmtree(args.database)
+                                print(f"Old database deleted. Creating new database...")
+                                vector_db = Chroma(
+                                    persist_directory=args.database,
+                                    embedding_function=embedding_function
+                                )
+                                print(f"New database {args.database} has been created with embedding dimension {current_dim}.")
+                            else:
+                                raise
+                    else:
+                        print(f"The database {args.database} has been loaded (new collection, embedding dim: {current_dim}).")
+                except Exception as check_error:
+                    error_msg = str(check_error)
+                    if "dimension" in error_msg.lower() or "embedding" in error_msg.lower():
+                        print(f"Embedding dimension mismatch detected: {error_msg}")
+                        print(f"Deleting old database at '{args.database}' and recreating...")
+                        import shutil
+                        shutil.rmtree(args.database)
+                        print(f"Old database deleted. Creating new database...")
+                        vector_db = Chroma(
+                            persist_directory=args.database,
+                            embedding_function=embedding_function
+                        )
+                        print(f"New database {args.database} has been created with current embedding model.")
+                    else:
+                        # If it's not a dimension error, re-raise it
+                        raise
+            except (ValueError, Exception) as e:
+                error_msg = str(e)
+                # Check if it's a dimension mismatch error
+                if "dimension" in error_msg.lower() or "embedding" in error_msg.lower():
+                    print(f"Embedding dimension mismatch detected: {error_msg}")
+                    print(f"Deleting old database at '{args.database}' and recreating with current embedding model...")
+                    try:
+                        import shutil
+                        shutil.rmtree(args.database)
+                        print(f"Old database deleted. Creating new database...")
+                        vector_db = Chroma(
+                            persist_directory=args.database,
+                            embedding_function=embedding_function
+                        )
+                        print(f"New database {args.database} has been created with current embedding model.")
+                    except Exception as e3:
+                        print(f"Failed to recreate database: {e3}")
+                        vector_db = None
+                else:
+                    print(f"Error initializing Chroma for directory '{args.database}': {e}")
+                    vector_db = None
         else:
             vector_db = None
     else:
-        print(f"The database {args.database} does not exist.")
-        vector_db = None
+        # Database path doesn't exist
+        if args.read_db or args.write_db:
+            # If read_db or write_db is enabled, create the database
+            print(f"The database {args.database} does not exist.")
+            print("Creating new database...")
+            try:
+                # Try using Ollama embeddings first (faster, local)
+                embedding_function = OllamaEmbeddings(model="llama3:8b")
+                print("Using Ollama embeddings for vector database.")
+            except Exception as e:
+                print(f"Failed to initialize Ollama embeddings: {e}")
+                try:
+                    # Fallback to HuggingFace embeddings
+                    embedding_function = HuggingFaceEmbeddings(
+                        model_name="all-MiniLM-L6-v2"
+                    )
+                    print("Using HuggingFace embeddings for vector database.")
+                except Exception as e2:
+                    print(f"Failed to initialize HuggingFace embeddings: {e2}")
+                    print("Vector database disabled.")
+                    vector_db = None
+                    embedding_function = None
+            
+            if embedding_function:
+                try:
+                    # Create parent directory if it doesn't exist
+                    os.makedirs(os.path.dirname(args.database), exist_ok=True)
+                    vector_db = Chroma(
+                        persist_directory=args.database,
+                        embedding_function=embedding_function
+                    )
+                    test_embedding = embedding_function.embed_query("test")
+                    current_dim = len(test_embedding)
+                    print(f"New database {args.database} has been created (embedding dim: {current_dim}).")
+                except Exception as e:
+                    print(f"Error creating database: {e}")
+                    vector_db = None
+            else:
+                vector_db = None
+        else:
+            print(f"The database {args.database} does not exist (read_db/write_db disabled).")
+            vector_db = None
 
 
     # Iterate over each agent and run attack scenarios
@@ -272,10 +385,10 @@ def main():
         tasks = agent_info["tasks"]
         attacker_tools = attacker_tools_all[attacker_tools_all["Corresponding Agent"] == agent_name]
         
-        print(f"Processing agent: {agent_name}")
-        print(f"Agent path: {agent_path}")
-        print(f"Number of tasks: {len(tasks)}")
-        print(f"Number of attacker tools: {len(attacker_tools)}")
+        print(f"Processing agent: {agent_name}", flush=True)
+        print(f"Agent path: {agent_path}", flush=True)
+        print(f"Number of tasks: {len(tasks)}", flush=True)
+        print(f"Number of attacker tools: {len(attacker_tools)}", flush=True)
 
         # Run attacks for each task
         for i, task in enumerate(tasks):
@@ -287,7 +400,7 @@ def main():
                 if args.pot_backdoor or args.pot_clean:
                     args.target = tool["Attacker Tool"]
                 
-                print(f'Running agent: {agent_name} with task: {task} and attacker tool: {tool["Attacker Tool"]}')
+                print(f'Running agent: {agent_name} with task: {task} and attacker tool: {tool["Attacker Tool"]}', flush=True)
 
                 agent_attack = agent_thread_pool.submit(
                     agent_factory.run_agent,
@@ -325,26 +438,49 @@ def main():
         ])
 
 
+    print(f"\n{'='*60}", flush=True)
+    print(f"Starting to process {len(agent_tasks)} agent tasks...", flush=True)
+    print(f"{'='*60}\n", flush=True)
+    
+    completed_count = 0
     for r in as_completed(agent_tasks):
-        res = r.result()
-        print("**********************************")
-        print(args)
+        completed_count += 1
+        print(f"\n[Progress: {completed_count}/{len(agent_tasks)}] Processing result...", flush=True)
+        
+        try:
+            res = r.result()
+        except Exception as e:
+            print(f"ERROR: Task execution failed: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
+            print(f"[Progress: {completed_count}/{len(agent_tasks)}] Task failed, continuing...\n", flush=True)
+            continue
+        
+        print("**********************************", flush=True)
+        print(args, flush=True)
 
-        attacker_goal = attacker_tools_all[attacker_tools_all["Attacker Tool"] == res["attacker_tool"]]['Attack goal'].iloc[0]
-        attack_successful = check_attack_success(res["messages"], args, attacker_goal)
+        try:
+            attacker_goal = attacker_tools_all[attacker_tools_all["Attacker Tool"] == res["attacker_tool"]]['Attack goal'].iloc[0]
+            attack_successful = check_attack_success(res["messages"], args, attacker_goal)
 
-        if attack_successful:
-            print("Attack successful.")
-            attack_succ += 1
-        else:
-            print("Attack failed.")
+            if attack_successful:
+                print("Attack successful.", flush=True)
+                attack_succ += 1
+            else:
+                print("Attack failed.", flush=True)
 
-        original_successful = check_original_success(res["messages"], args, res["normal_tools"])
-        if original_successful:
-            orgin_succ += 1
-            print("Original task successful.")
-        else:
-            print("Original task failed.")
+            original_successful = check_original_success(res["messages"], args, res["normal_tools"])
+            if original_successful:
+                orgin_succ += 1
+                print("Original task successful.", flush=True)
+            else:
+                print("Original task failed.", flush=True)
+        except Exception as e:
+            print(f"ERROR: Failed to check attack/original success: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
+            attack_successful = False
+            original_successful = False
 
         # workflow_failure_flag = res['workflow_failure']
         # if workflow_failure_flag:
@@ -352,77 +488,98 @@ def main():
         #     print("Workflow generation failed.")
 
         for message in res["messages"]:
-            print(message)
+            print(message, flush=True)
 
         attack_tool = res["attacker_tool"]
-        print(f"Attack Tool: {attack_tool}")
+        print(f"Attack Tool: {attack_tool}", flush=True)
 
-        task = res["messages"][3]['content']
+        try:
+            task = res["messages"][3]['content']
+        except (IndexError, KeyError) as e:
+            print(f"WARNING: Could not extract task from messages: {e}", flush=True)
+            task = "Unknown"
+        
         memory_found_flag = None
 
         if args.read_db:
-            memory_found = res["memory_found"]
-            print("Task: ", task)
-            print("Memory search: ", res["memory_search"])
-            print("Memory found: ", memory_found)
+            try:
+                memory_found = res.get("memory_found")
+                print("Task: ", task, flush=True)
+                print("Memory search: ", res.get("memory_search"), flush=True)
+                print("Memory found: ", memory_found, flush=True)
 
-            if args.direct_prompt_injection:
-                task = task.split(';')[0]
+                if args.direct_prompt_injection:
+                    task = task.split(';')[0]
 
-            if task in memory_found and res["attacker_tool"] in memory_found:
-                memory_search_succ += 1
-                print("The memory search found attacker tool history successfully.")
-                memory_found_flag = True
-            else:
-                print("The memory search did NOT find attacker tool history successfully.")
+                if memory_found and task in memory_found and res["attacker_tool"] in memory_found:
+                    memory_search_succ += 1
+                    print("The memory search found attacker tool history successfully.", flush=True)
+                    memory_found_flag = True
+                else:
+                    print("The memory search did NOT find attacker tool history successfully.", flush=True)
+                    memory_found_flag = False
+            except Exception as e:
+                print(f"WARNING: Error checking memory search: {e}", flush=True)
                 memory_found_flag = False
 
         # Filter messages to extract thinking/reasoning
-        filtered_messages = [msg for msg in res["messages"] if "[Thinking]" in str(msg) or "'thinking'" in str(msg)]
-        refuse_res = judge_response(str(filtered_messages)) if len(filtered_messages) > 1 else '1'
+        try:
+            filtered_messages = [msg for msg in res["messages"] if "[Thinking]" in str(msg) or "'thinking'" in str(msg)]
+            refuse_res = judge_response(str(filtered_messages)) if len(filtered_messages) > 1 else '1'
 
-        if refuse_res == '0':
-            print("The model response doesn't comply with the user request.")
-            refuse_cnt += 1
-        elif refuse_res == '1':
-            print("The model response complies with the user request.")
-        else:
-            print(f"Refuse judge Error: {refuse_res}")
+            if refuse_res == '0':
+                print("The model response doesn't comply with the user request.", flush=True)
+                refuse_cnt += 1
+            elif refuse_res == '1':
+                print("The model response complies with the user request.", flush=True)
+            else:
+                print(f"Refuse judge Error: {refuse_res}", flush=True)
+        except Exception as e:
+            print(f"WARNING: Error judging response: {e}", flush=True)
+            refuse_res = '1'
 
-        print("**********************************")
+        print("**********************************", flush=True)
 
         # Save results to CSV
-        with open(args.res_file, mode='a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([
-                res['agent_name'],
-                attack_tool,
-                1 if attack_successful else 0,
-                1 if original_successful else 0,
-                1 if refuse_res == '0' else 0,
-                "N/A" if memory_found_flag is None else (1 if memory_found_flag else 0),
-                1 if res['agg'] == 'True' else 0,
-                res["messages"]
-            ])
-    print(f"Total number of attacks: {len(agent_tasks)}")
+        try:
+            with open(args.res_file, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([
+                    res.get('agent_name', 'Unknown'),
+                    attack_tool,
+                    1 if attack_successful else 0,
+                    1 if original_successful else 0,
+                    1 if refuse_res == '0' else 0,
+                    "N/A" if memory_found_flag is None else (1 if memory_found_flag else 0),
+                    1 if res.get('agg') == 'True' else 0,
+                    res.get("messages", [])
+                ])
+        except Exception as e:
+            print(f"ERROR: Failed to save result to CSV: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
+    
+    print(f"\n{'='*60}", flush=True)
+    print(f"Total number of attacks: {len(agent_tasks)}", flush=True)
     
     if len(agent_tasks) == 0:
-        print("No tasks to execute. Please check your configuration.")
+        print("No tasks to execute. Please check your configuration.", flush=True)
     else:
-        print(f"Number of successful attacks: {attack_succ}")
-        print(f'Number of workflow generation failures: {workflow_failure}')
+        print(f"Number of successful attacks: {attack_succ}", flush=True)
+        print(f'Number of workflow generation failures: {workflow_failure}', flush=True)
         # print(f'Number of tool calling success: {tool_call_success}')
-        print(f"Attack success rate: {attack_succ/len(agent_tasks)}")
-        print(f"Attack success rate excluding workflow failure cases: {attack_succ/(len(agent_tasks)-workflow_failure)}")
-        print(f'Number of original task success: {orgin_succ}')
-        print(f'Original task success rate: {orgin_succ/len(agent_tasks)}')
+        print(f"Attack success rate: {attack_succ/len(agent_tasks)}", flush=True)
+        if len(agent_tasks) - workflow_failure > 0:
+            print(f"Attack success rate excluding workflow failure cases: {attack_succ/(len(agent_tasks)-workflow_failure)}", flush=True)
+        print(f'Number of original task success: {orgin_succ}', flush=True)
+        print(f'Original task success rate: {orgin_succ/len(agent_tasks)}', flush=True)
 
-        print(f"Refuse judge success number: {refuse_cnt}")
-        print(f"Refuse judge success rate: {refuse_cnt/len(agent_tasks)}")
+        print(f"Refuse judge success number: {refuse_cnt}", flush=True)
+        print(f"Refuse judge success rate: {refuse_cnt/len(agent_tasks)}", flush=True)
 
         if args.read_db:
-            print(f"Memory search success number: {memory_search_succ}")
-            print(f"Memory search success rate: {memory_search_succ/len(agent_tasks)}")
+            print(f"Memory search success number: {memory_search_succ}", flush=True)
+            print(f"Memory search success rate: {memory_search_succ/len(agent_tasks)}", flush=True)
 
 
     scheduler.stop()

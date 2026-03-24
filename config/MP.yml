@@ -17,8 +17,8 @@ llms:
   # - ollama/gemma2:27b
   # - ollama/llama3:70b
   # - ollama/llama3.1:70b
-  # - ollama/mixtral:8x7b
-  - ollama/llama3:8b
+  - ollama/mixtral:8x7b
+  # - ollama/llama3:8b
   # - ollama/llama3.1:8b
 
 attack_types:
@@ -27,6 +27,4 @@ attack_types:
   # - fake_completion
   # - escape_characters
   # - naive
-
-
 # suffix: test2

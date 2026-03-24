@@ -50,6 +50,7 @@ from app.services.settings import (
 from app.services.catalog import get_agents_payload, get_attack_tools_payload
 from app.services.streams import stream_task_logs_response
 from app.services.sockets import register_socketio_handlers
+from app.services.reports import generate_detection_report
 
 
 ensure_schema()
@@ -214,6 +215,17 @@ def detection_result(task_id):
     payload, code = build_detection_result(task_id, attack)
     return jsonify(payload), code
 
+
+@app.route("/api/detection/report/<task_id>", methods=["GET"])
+def detection_report(task_id):
+    """
+    生成或获取智能体安全检测报告：
+    - 首次调用：基于单智能体检测结果与日志，调用对应模型生成报告并缓存到任务记录；
+    - 后续调用：直接返回缓存的报告内容，避免重复消耗推理资源。
+    """
+    payload, code = generate_detection_report(task_id)
+    return jsonify(payload), code
+
 @app.route('/api/detection/cancel/<task_id>', methods=['POST'])
 def cancel_detection(task_id):
     """取消检测任务（先TERM后KILL，写DB并广播）"""
@@ -301,8 +313,9 @@ def get_task_progress(task_id):
     """获取任务实时进度信息"""
     try:
         # 首先检查任务是否在 running_tasks 中
-        if task_id in running_tasks:
-            task = running_tasks[task_id]
+        task = running_tasks.get(task_id)
+        # 防御：如果 task 不是有效 dict（例如被错误地置为 None），视为不存在，走 DB 分支
+        if isinstance(task, dict) and task:
 
             # 更新任务进度
             update_task_progress(task_id)
@@ -339,7 +352,7 @@ def get_task_progress(task_id):
                 'error': task.get('error')
             })
         else:
-            # 如果不在 running_tasks 中，尝试从数据库获取
+            # 如果不在 running_tasks 中，或者内存中的任务无效，尝试从数据库获取
             db_task = get_task_from_db(task_id)
             if db_task:
                 # 确保进度值是数字类型
