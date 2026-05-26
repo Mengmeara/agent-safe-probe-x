@@ -33,16 +33,19 @@ export interface AttackHook {
   onObservation?(toolName: string, content: string): InjectionResult;
 }
 
+export type MaybePromise<T> = T | Promise<T>;
+
 /**
  * Defenses wrap the same channels. They can rewrite, filter, or augment.
  * A wrapper returning the original content is a no-op.
+ * Hook methods may be async — useful for LLM-based defenses like paraphrasing.
  */
 export interface DefenseHook {
-  wrapSystemPrompt?(prompt: string): string;
-  wrapUserTask?(task: string): string;
-  wrapObservation?(toolName: string, content: string): string;
+  wrapSystemPrompt?(prompt: string): MaybePromise<string>;
+  wrapUserTask?(task: string): MaybePromise<string>;
+  wrapObservation?(toolName: string, content: string): MaybePromise<string>;
   /** Return false to suppress the observation entirely. */
-  filterObservation?(toolName: string, content: string): boolean;
+  filterObservation?(toolName: string, content: string): MaybePromise<boolean>;
 }
 
 /** Optional in-memory context for the agent (simulated RAG). */

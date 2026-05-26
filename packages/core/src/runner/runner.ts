@@ -48,7 +48,7 @@ export async function runAgent(opts: RunnerOptions): Promise<RunnerResult> {
     systemInjection = r.injection;
   }
   if (opts.defense?.wrapSystemPrompt) {
-    systemContent = opts.defense.wrapSystemPrompt(systemContent);
+    systemContent = await opts.defense.wrapSystemPrompt(systemContent);
   }
   record({
     kind: "system_prompt",
@@ -81,7 +81,7 @@ export async function runAgent(opts: RunnerOptions): Promise<RunnerResult> {
     taskInjection = r.injection;
   }
   if (opts.defense?.wrapUserTask) {
-    taskContent = opts.defense.wrapUserTask(taskContent);
+    taskContent = await opts.defense.wrapUserTask(taskContent);
   }
   record({ kind: "user_task", content: taskContent, injection: taskInjection });
 
@@ -179,12 +179,11 @@ export async function runAgent(opts: RunnerOptions): Promise<RunnerResult> {
 
       // Defense may suppress or rewrite the observation.
       if (opts.defense?.filterObservation) {
-        if (!opts.defense.filterObservation(tc.name, obs)) {
-          obs = "[observation filtered by defense]";
-        }
+        const keep = await opts.defense.filterObservation(tc.name, obs);
+        if (!keep) obs = "[observation filtered by defense]";
       }
       if (opts.defense?.wrapObservation) {
-        obs = opts.defense.wrapObservation(tc.name, obs);
+        obs = await opts.defense.wrapObservation(tc.name, obs);
       }
 
       record({
