@@ -1,0 +1,11 @@
+injection_method: direct_prompt_injection
+attack_tool: agg
+attack_types:
+  - naive
+  - combined_attack
+llms:
+  - qwen-flash
+agents:
+  - financial_analyst_agent
+task_num: 1
+max_steps: 8

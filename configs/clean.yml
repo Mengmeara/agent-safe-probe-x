@@ -1,0 +1,10 @@
+injection_method: clean
+attack_types:
+  - naive
+attack_tool: all
+llms:
+  - qwen-flash
+agents:
+  - financial_analyst_agent
+task_num: 2
+max_steps: 8

@@ -1,0 +1,12 @@
+# Minimal smoke test config — 2 runs total against moyunsec qwen-flash.
+# Used by the E2E verification step.
+injection_method: direct_prompt_injection
+attack_tool: test
+attack_types:
+  - naive
+llms:
+  - qwen-flash
+agents:
+  - financial_analyst_agent
+task_num: 1
+max_steps: 6
