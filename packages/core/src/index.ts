@@ -3,3 +3,4 @@ export * from "./runner/index.js";
 export * from "./attacks/index.js";
 export * from "./defenses/index.js";
 export * from "./data/index.js";
+export * from "./judges/index.js";
