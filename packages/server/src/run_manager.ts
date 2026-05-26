@@ -139,7 +139,9 @@ export class RunManager {
           });
         },
         onResult: (r) => {
-          // Persist trace if buffered, then result.
+          // Insert the result first, then the trace — the trace row has
+          // an FK to results.id, so the order matters.
+          this.store.insertResult(r);
           const buf = this.traceBuffers.get(r.id);
           if (buf) {
             buf.id = r.trace_id;
@@ -147,7 +149,6 @@ export class RunManager {
             this.store.insertTrace(buf);
             this.traceBuffers.delete(r.id);
           }
-          this.store.insertResult(r);
           progress.done += 1;
           if (r.judge.attack_success) progress.attack_success += 1;
           if (r.judge.refused) progress.refused += 1;
