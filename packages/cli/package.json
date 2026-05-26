@@ -1,0 +1,29 @@
+{
+  "name": "@asp-x/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "asp-x": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@asp-x/shared": "workspace:*",
+    "@asp-x/core": "workspace:*",
+    "@asp-x/server": "workspace:*",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "kleur": "^4.1.5",
+    "yaml": "^2.4.5"
+  }
+}

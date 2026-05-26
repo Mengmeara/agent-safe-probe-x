@@ -1,0 +1,24 @@
+{
+  "name": "asp-x",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agent Safe Probe X — TypeScript rewrite of the ASB agent-security benchmark, with web UI and trace visualization.",
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/*\" build",
+    "test": "pnpm -r --filter \"./packages/*\" test",
+    "dev:server": "pnpm --filter @asp-x/server dev",
+    "dev:web": "pnpm --filter @asp-x/web dev",
+    "asp-x": "node packages/cli/dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "tsx": "^4.7.3",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "packageManager": "pnpm@11.3.0",
+  "engines": {
+    "node": ">=20"
+  }
+}
