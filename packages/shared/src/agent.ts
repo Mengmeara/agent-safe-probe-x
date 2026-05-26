@@ -37,6 +37,13 @@ export const ToolDefSchema = z.object({
   aggressive: z.boolean().optional(),
 
   /**
+   * Natural-language instruction the attacker wants to plant.
+   * Embedded into the universal injection template at attack-build time.
+   * Only meaningful for attack tools.
+   */
+  attack_instruction: z.string().optional(),
+
+  /**
    * String marker the tool emits when called. Used by the original-task judge
    * to detect that this step of the task was completed.
    */

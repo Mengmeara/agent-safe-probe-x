@@ -27,6 +27,8 @@ export const InjectionMarkSchema = z.object({
   variant: AttackVariantSchema.optional(),
   target_tool: z.string(),
   payload: z.string(),
+  /** PoT trigger phrase, when method === "pot_backdoor". */
+  trigger: z.string().optional(),
 });
 export type InjectionMark = z.infer<typeof InjectionMarkSchema>;
 
