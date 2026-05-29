@@ -8,18 +8,18 @@ const NAV = [
 
 export function Layout() {
   return (
-    <div className="min-h-screen flex flex-col bg-bg-900 text-ink-900">
-      <header className="border-b border-bg-600/60 px-6 py-3 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col text-ink-900">
+      <header className="glass sticky top-0 z-30 border-b px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Logo />
           <div>
-            <div className="font-semibold tracking-tight">ASP-X</div>
-            <div className="text-xs text-ink-500 -mt-0.5">
+            <div className="font-semibold tracking-tight leading-none">ASP-X</div>
+            <div className="text-xs text-ink-500 mt-1">
               Agent Safe Probe — benchmark dashboard
             </div>
           </div>
         </div>
-        <nav className="flex gap-1">
+        <nav className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.05]">
           {NAV.map((n) => (
             <NavLink
               key={n.to}
@@ -27,14 +27,14 @@ export function Layout() {
               end={n.to === "/"}
               className={({ isActive }) =>
                 clsx(
-                  "px-3 py-1.5 rounded-md text-sm transition-colors",
+                  "px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200",
                   isActive
-                    ? "bg-bg-600 text-ink-900"
-                    : "text-ink-500 hover:text-ink-700 hover:bg-bg-700",
+                    ? "bg-white/[0.08] text-ink-900 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset]"
+                    : "text-ink-500 hover:text-ink-900 hover:bg-white/[0.04]",
                 )
               }
             >
-              <span className="mr-1.5 text-ink-500">{n.icon}</span>
+              <span className="mr-1.5 opacity-70">{n.icon}</span>
               {n.label}
             </NavLink>
           ))}
@@ -49,8 +49,9 @@ export function Layout() {
 
 function Logo() {
   return (
-    <div className="w-8 h-8 rounded-md bg-gradient-to-br from-accent-attack to-accent-tool grid place-items-center shadow-glow">
-      <span className="text-white font-mono text-sm font-bold">X</span>
+    <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-accent-attack via-accent-tool to-accent-info grid place-items-center shadow-[0_6px_20px_-6px_rgba(167,139,250,0.6)]">
+      <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/20" />
+      <span className="text-white font-mono text-base font-bold drop-shadow">X</span>
     </div>
   );
 }

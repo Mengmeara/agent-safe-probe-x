@@ -22,10 +22,10 @@ export function ResultPage() {
   const result = resultsQ.data?.find((r) => r.id === resultId);
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8 space-y-5">
+    <div className="max-w-5xl mx-auto px-6 py-8 space-y-5 animate-fade-up">
       <Link
         to={`/runs/${id}`}
-        className="text-sm text-ink-500 hover:text-ink-700 inline-flex items-center gap-1"
+        className="text-sm text-ink-500 hover:text-ink-900 inline-flex items-center gap-1 transition-colors"
       >
         ← back to run
       </Link>
@@ -73,8 +73,8 @@ function ResultHeader({ result }: { result: RunResult }) {
         </span>
       </div>
 
-      <div className="border border-bg-600 rounded-lg bg-bg-800/60 p-4">
-        <div className="text-xs uppercase tracking-wide text-ink-500 mb-1.5">
+      <div className="card p-4">
+        <div className="text-xs uppercase tracking-wider text-ink-500 mb-1.5">
           Task
         </div>
         <div className="text-sm text-ink-700 leading-relaxed">{result.task}</div>

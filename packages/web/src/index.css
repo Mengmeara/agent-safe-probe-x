@@ -2,6 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html,
+  body {
+    min-height: 100%;
+  }
+  body {
+    /* Layered radial glows over the dark base for depth */
+    background-color: #0b0d12;
+    background-image:
+      radial-gradient(1100px 560px at 78% -12%, rgba(96, 165, 250, 0.10), transparent 60%),
+      radial-gradient(900px 520px at -8% -6%, rgba(167, 139, 250, 0.09), transparent 55%),
+      radial-gradient(800px 600px at 120% 110%, rgba(52, 211, 153, 0.06), transparent 55%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: rgba(96, 165, 250, 0.28);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.55);
+    border-radius: 6px;
+  }
+}
+
+@layer components {
+  /* Frosted surface for headers / overlays */
+  .glass {
+    @apply bg-bg-800/55 backdrop-blur-xl border-white/[0.06];
+  }
+  /* Standard elevated surface */
+  .card {
+    @apply rounded-xl border border-white/[0.06] bg-bg-800/60 shadow-card;
+  }
+  .card-hover {
+    @apply transition-all duration-200 hover:border-white/[0.12] hover:bg-bg-800/80;
+  }
+  /* Hairline divider that reads on the dark bg */
+  .hairline {
+    @apply border-white/[0.06];
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+      text-white bg-gradient-to-br from-accent-info to-accent-tool
+      shadow-[0_8px_24px_-8px_rgba(96,165,250,0.5)]
+      transition-all duration-200 hover:brightness-110 hover:-translate-y-px
+      disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm
+      text-ink-700 border border-white/[0.08] bg-white/[0.02]
+      transition-colors duration-200 hover:bg-white/[0.06] hover:text-ink-900;
+  }
+}
+
 /* Subtle scrollbar styling for dark UI */
 ::-webkit-scrollbar {
   width: 10px;
@@ -12,7 +67,7 @@
 }
 ::-webkit-scrollbar-thumb {
   background: #2a3040;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }

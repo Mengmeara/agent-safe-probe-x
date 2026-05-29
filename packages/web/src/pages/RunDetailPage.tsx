@@ -43,13 +43,13 @@ export function RunDetailPage() {
   const results = resultsQ.data ?? [];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+    <div className="max-w-6xl mx-auto px-6 py-8 space-y-6 animate-fade-up">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-xs text-ink-500 mb-1">
+          <div className="text-xs text-ink-500 mb-1 font-mono">
             Run · {shortId(run.id)}
           </div>
-          <h1 className="text-xl font-semibold flex items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-3">
             {run.label ?? run.config.injection_method}
             <StatusBadge status={run.status} />
           </h1>
@@ -62,15 +62,12 @@ export function RunDetailPage() {
           {run.status === "running" && (
             <button
               onClick={() => void api.cancelRun(run.id).then(() => qc.invalidateQueries({ queryKey: ["run", run.id] }))}
-              className="px-3 py-1.5 rounded-md bg-bg-700 hover:bg-bg-600 text-sm"
+              className="btn-ghost"
             >
               Cancel
             </button>
           )}
-          <Link
-            to="/"
-            className="px-3 py-1.5 rounded-md bg-bg-700 hover:bg-bg-600 text-sm"
-          >
+          <Link to="/" className="btn-ghost">
             ← Back
           </Link>
         </div>
@@ -92,30 +89,30 @@ export function RunDetailPage() {
           )}
         </div>
         {results.length === 0 && (
-          <div className="border border-dashed border-bg-500 rounded-md p-12 text-center text-ink-500">
+          <div className="card p-12 text-center text-ink-500">
             Waiting for first result…
           </div>
         )}
         {results.length > 0 && (
-          <div className="overflow-hidden border border-bg-600 rounded-lg">
+          <div className="card overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-bg-700 text-ink-500 text-xs uppercase tracking-wide">
-                <tr>
-                  <th className="text-left px-4 py-2 font-normal">Agent</th>
-                  <th className="text-left px-4 py-2 font-normal">Variant</th>
-                  <th className="text-left px-4 py-2 font-normal">Target tool</th>
-                  <th className="text-left px-4 py-2 font-normal">Task</th>
-                  <th className="text-center px-4 py-2 font-normal">ASR</th>
-                  <th className="text-center px-4 py-2 font-normal">RR</th>
-                  <th className="text-center px-4 py-2 font-normal">PNA</th>
-                  <th className="text-right px-4 py-2 font-normal">Trace</th>
+              <thead className="text-ink-500 text-xs uppercase tracking-wider">
+                <tr className="border-b hairline">
+                  <th className="text-left px-4 py-3 font-medium">Agent</th>
+                  <th className="text-left px-4 py-3 font-medium">Variant</th>
+                  <th className="text-left px-4 py-3 font-medium">Target tool</th>
+                  <th className="text-left px-4 py-3 font-medium">Task</th>
+                  <th className="text-center px-4 py-3 font-medium">ASR</th>
+                  <th className="text-center px-4 py-3 font-medium">RR</th>
+                  <th className="text-center px-4 py-3 font-medium">PNA</th>
+                  <th className="text-right px-4 py-3 font-medium">Trace</th>
                 </tr>
               </thead>
               <tbody>
                 {results.map((r) => (
                   <tr
                     key={r.id}
-                    className="border-t border-bg-600 hover:bg-bg-700/40"
+                    className="border-t hairline hover:bg-white/[0.03] transition-colors"
                   >
                     <td className="px-4 py-2 text-xs">{r.agent_id}</td>
                     <td className="px-4 py-2 text-xs font-mono text-ink-700">
@@ -161,7 +158,7 @@ export function RunDetailPage() {
           <h2 className="text-sm uppercase tracking-wide text-ink-500 font-semibold mb-2">
             Live event stream
           </h2>
-          <div className="border border-bg-600 rounded-lg bg-bg-800 p-3 font-mono text-xs h-48 overflow-auto space-y-0.5">
+          <div className="card bg-bg-900/60 p-3 font-mono text-xs h-48 overflow-auto space-y-0.5">
             {liveLog.slice(-20).map((ev, i) => (
               <div key={i} className="text-ink-500">
                 <span className="text-accent-info">{ev.type}</span>
@@ -243,14 +240,32 @@ function Metric({
     warn: "text-accent-warn",
     safe: "text-accent-safe",
   }[tone];
+  const bar = {
+    default: "from-ink-500/40",
+    attack: "from-accent-attack",
+    warn: "from-accent-warn",
+    safe: "from-accent-safe",
+  }[tone];
+  const glow = {
+    default: "",
+    attack: "hover:shadow-glow-attack",
+    warn: "hover:shadow-glow-warn",
+    safe: "hover:shadow-glow-safe",
+  }[tone];
   return (
-    <div className="border border-bg-600 rounded-lg bg-bg-800/60 p-4">
-      <div className="text-xs text-ink-500 mb-1">{label}</div>
-      <div className={clsx("text-2xl font-semibold font-mono", accent)}>
+    <div
+      className={clsx(
+        "card card-hover relative overflow-hidden p-4 transition-shadow duration-300",
+        glow,
+      )}
+    >
+      <div className={clsx("absolute inset-x-0 top-0 h-px bg-gradient-to-r to-transparent", bar)} />
+      <div className="text-[11px] uppercase tracking-wider text-ink-500 mb-1.5">{label}</div>
+      <div className={clsx("text-3xl font-semibold font-mono tracking-tight", accent)}>
         {value}
         {sub && <span className="text-ink-500 text-sm font-normal ml-1">{sub}</span>}
       </div>
-      {hint && <div className="text-[10px] uppercase text-ink-500 mt-1 tracking-wide">{hint}</div>}
+      {hint && <div className="text-[10px] uppercase text-ink-400 mt-1.5 tracking-wide">{hint}</div>}
     </div>
   );
 }
@@ -258,7 +273,7 @@ function Metric({
 function ConfigSummary({ run }: { run: RunSummary }) {
   const c = run.config;
   return (
-    <section className="border border-bg-600 rounded-lg bg-bg-800/40 p-4 text-xs">
+    <section className="card p-4 text-xs">
       <div className="flex flex-wrap gap-x-6 gap-y-1.5">
         <ConfigLine k="injection_method" v={c.injection_method} />
         <ConfigLine k="attack_tool" v={c.attack_tool} />

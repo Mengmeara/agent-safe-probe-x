@@ -26,20 +26,20 @@ export function TraceTimeline({ steps }: { steps: TraceStep[] }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm uppercase tracking-wide text-ink-500 font-semibold">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm uppercase tracking-wider text-ink-500 font-semibold">
           Trajectory ({steps.length} step{steps.length === 1 ? "" : "s"})
         </h2>
-        <div className="flex gap-1 bg-bg-700 rounded-md p-0.5 text-xs">
+        <div className="flex gap-1 bg-white/[0.03] border border-white/[0.06] rounded-lg p-0.5 text-xs">
           {(["all", "tools", "injected"] as const).map((k) => (
             <button
               key={k}
               onClick={() => setFilter(k)}
               className={clsx(
-                "px-2 py-1 rounded transition-colors",
+                "px-2.5 py-1 rounded-md transition-all duration-150",
                 filter === k
-                  ? "bg-bg-500 text-ink-900"
-                  : "text-ink-500 hover:text-ink-700",
+                  ? "bg-white/[0.08] text-ink-900 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset]"
+                  : "text-ink-500 hover:text-ink-900",
               )}
             >
               {k}
@@ -49,8 +49,8 @@ export function TraceTimeline({ steps }: { steps: TraceStep[] }) {
       </div>
 
       <div className="relative">
-        <div className="absolute left-[14px] top-2 bottom-2 w-px bg-bg-500" />
-        <ol className="space-y-2">
+        <div className="absolute left-[15px] top-2 bottom-2 w-px bg-gradient-to-b from-white/[0.04] via-white/[0.1] to-white/[0.04]" />
+        <ol className="space-y-2.5">
           {filtered.map((step) => (
             <TraceStepCard key={step.index} step={step} />
           ))}
@@ -120,26 +120,26 @@ function TraceStepCard({ step }: { step: TraceStep }) {
   const isAttackHit =
     step.kind === "observation" && step.observation?.was_attack_tool === true;
   return (
-    <li className="relative pl-10">
+    <li className="relative pl-11">
       <div
         className={clsx(
-          "absolute left-0 top-1 w-7 h-7 rounded-full grid place-items-center text-[10px] font-mono font-bold ring-2",
+          "absolute left-0 top-1 w-8 h-8 rounded-xl grid place-items-center text-[10px] font-mono font-bold ring-2 backdrop-blur-sm z-10",
           meta.tone,
           meta.ring,
           meta.bg,
-          isAttackHit && "ring-accent-attack/60",
+          isAttackHit && "ring-accent-attack/70 shadow-glow-attack",
         )}
       >
         {meta.label}
       </div>
       <div
         className={clsx(
-          "border rounded-lg p-3 bg-bg-800",
+          "border rounded-xl p-3.5 bg-bg-800/70 backdrop-blur-sm transition-colors",
           isInjected
-            ? "border-accent-attack/40 shadow-[0_0_0_1px_rgba(255,93,93,0.1)]"
+            ? "border-accent-attack/40 shadow-[0_0_0_1px_rgba(255,93,93,0.12),0_8px_28px_-14px_rgba(255,93,93,0.5)]"
             : isAttackHit
-              ? "border-accent-attack/60 shadow-[0_0_0_1px_rgba(255,93,93,0.15)]"
-              : "border-bg-600",
+              ? "border-accent-attack/60 shadow-glow-attack"
+              : "border-white/[0.07] hover:border-white/[0.12]",
         )}
       >
         <div className="flex items-center justify-between mb-1">

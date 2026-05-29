@@ -20,3 +20,19 @@ data/*.db-journal
 .pnpm-store/
 playwright-report/
 test-results/
+
+# Runtime run outputs
+logs/
+
+# Vite temp files
+*.timestamp-*.mjs
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Competition paperwork (申报书 / 佐证材料) and its generation tooling
+*.docx
+附录佐证材料-草稿.md
+scripts/md_to_docx.py
+scripts/merge_into_form.py

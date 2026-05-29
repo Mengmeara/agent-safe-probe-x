@@ -13,19 +13,16 @@ export function RunsPage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="max-w-6xl mx-auto px-6 py-8 animate-fade-up">
       <header className="flex items-end justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold">Runs</h1>
-          <p className="text-sm text-ink-500">
+          <h1 className="text-2xl font-semibold tracking-tight">Runs</h1>
+          <p className="text-sm text-ink-500 mt-1">
             Each row is one benchmark execution against the bundled agents.
           </p>
         </div>
-        <Link
-          to="/runs/new"
-          className="px-3 py-1.5 rounded-md bg-accent-info/15 text-accent-info hover:bg-accent-info/25 text-sm font-medium"
-        >
-          + New Run
+        <Link to="/runs/new" className="btn-primary">
+          <span className="text-base leading-none">+</span> New Run
         </Link>
       </header>
 
@@ -37,30 +34,33 @@ export function RunsPage() {
       )}
 
       {q.data && q.data.length === 0 && (
-        <div className="border border-dashed border-bg-500 rounded-md p-12 text-center">
-          <div className="text-ink-500 mb-2">No runs yet.</div>
-          <Link
-            to="/runs/new"
-            className="text-accent-info hover:underline text-sm"
-          >
+        <div className="card p-14 text-center">
+          <div className="mx-auto mb-4 w-12 h-12 rounded-2xl bg-gradient-to-br from-accent-info/20 to-accent-tool/20 grid place-items-center text-accent-info text-xl">
+            ▢
+          </div>
+          <div className="text-ink-700 mb-1 font-medium">No runs yet</div>
+          <div className="text-ink-500 text-sm mb-4">
+            Kick off your first benchmark to see results here.
+          </div>
+          <Link to="/runs/new" className="btn-primary">
             Configure your first run →
           </Link>
         </div>
       )}
 
       {q.data && q.data.length > 0 && (
-        <div className="overflow-hidden border border-bg-600 rounded-lg">
+        <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-bg-700 text-ink-500 text-xs uppercase tracking-wide">
-              <tr>
-                <th className="text-left px-4 py-2 font-normal">Status</th>
-                <th className="text-left px-4 py-2 font-normal">Run</th>
-                <th className="text-left px-4 py-2 font-normal">Attack</th>
-                <th className="text-left px-4 py-2 font-normal">Model(s)</th>
-                <th className="text-right px-4 py-2 font-normal">Progress</th>
-                <th className="text-right px-4 py-2 font-normal">ASR</th>
-                <th className="text-right px-4 py-2 font-normal">RR</th>
-                <th className="text-right px-4 py-2 font-normal">Started</th>
+            <thead className="text-ink-500 text-xs uppercase tracking-wider">
+              <tr className="border-b hairline">
+                <th className="text-left px-4 py-3 font-medium">Status</th>
+                <th className="text-left px-4 py-3 font-medium">Run</th>
+                <th className="text-left px-4 py-3 font-medium">Attack</th>
+                <th className="text-left px-4 py-3 font-medium">Model(s)</th>
+                <th className="text-right px-4 py-3 font-medium">Progress</th>
+                <th className="text-right px-4 py-3 font-medium">ASR</th>
+                <th className="text-right px-4 py-3 font-medium">RR</th>
+                <th className="text-right px-4 py-3 font-medium">Started</th>
                 <th />
               </tr>
             </thead>
@@ -68,7 +68,7 @@ export function RunsPage() {
               {q.data.map((r) => (
                 <tr
                   key={r.id}
-                  className="border-t border-bg-600 hover:bg-bg-700/40 transition-colors"
+                  className="border-t hairline hover:bg-white/[0.03] transition-colors"
                 >
                   <td className="px-4 py-3">
                     <StatusBadge status={r.status} />

@@ -76,10 +76,10 @@ export function NewRunPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+    <div className="max-w-3xl mx-auto px-6 py-8 space-y-6 animate-fade-up">
       <header>
-        <h1 className="text-xl font-semibold">New Run</h1>
-        <p className="text-sm text-ink-500">
+        <h1 className="text-2xl font-semibold tracking-tight">New Run</h1>
+        <p className="text-sm text-ink-500 mt-1">
           Configure one benchmark run. The matrix size is shown below the form.
         </p>
       </header>
@@ -210,19 +210,11 @@ export function NewRunPage() {
         <button
           onClick={submit}
           disabled={!selectedModel || create.isPending}
-          className={clsx(
-            "px-4 py-2 rounded-md text-sm font-medium",
-            !selectedModel || create.isPending
-              ? "bg-bg-600 text-ink-500 cursor-not-allowed"
-              : "bg-accent-info text-bg-900 hover:bg-accent-info/90",
-          )}
+          className="btn-primary"
         >
           {create.isPending ? "Starting…" : "Start Run"}
         </button>
-        <button
-          onClick={() => nav("/")}
-          className="px-4 py-2 rounded-md text-sm text-ink-700 hover:bg-bg-700"
-        >
+        <button onClick={() => nav("/")} className="btn-ghost">
           Cancel
         </button>
       </div>
@@ -232,8 +224,8 @@ export function NewRunPage() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border border-bg-600 rounded-lg p-5 space-y-4 bg-bg-800/60">
-      <h2 className="text-sm uppercase tracking-wide text-ink-500 font-semibold">{title}</h2>
+    <section className="card p-5 space-y-4">
+      <h2 className="text-xs uppercase tracking-wider text-ink-500 font-semibold">{title}</h2>
       <div className="space-y-3">{children}</div>
     </section>
   );
@@ -265,7 +257,7 @@ function Input({
       value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-bg-700 border border-bg-500 rounded-md px-3 py-1.5 text-sm text-ink-900 placeholder-ink-500 focus:outline-none focus:border-accent-info"
+      className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-ink-900 placeholder-ink-500 transition-colors focus:outline-none focus:border-accent-info/70 focus:bg-white/[0.05]"
     />
   );
 }
@@ -283,7 +275,7 @@ function Select({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-bg-700 border border-bg-500 rounded-md px-3 py-1.5 text-sm text-ink-900 focus:outline-none focus:border-accent-info"
+      className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-ink-900 transition-colors focus:outline-none focus:border-accent-info/70 focus:bg-white/[0.05]"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
@@ -308,10 +300,10 @@ function Chip({
       type="button"
       onClick={onClick}
       className={clsx(
-        "px-2.5 py-1 rounded text-xs font-mono border transition-colors",
+        "px-2.5 py-1 rounded-lg text-xs font-mono border transition-all duration-150",
         active
-          ? "bg-accent-info/15 border-accent-info text-accent-info"
-          : "bg-bg-700 border-bg-500 text-ink-500 hover:text-ink-700",
+          ? "bg-accent-info/15 border-accent-info/60 text-accent-info shadow-[0_0_0_1px_rgba(96,165,250,0.15)]"
+          : "bg-white/[0.02] border-white/[0.08] text-ink-500 hover:text-ink-900 hover:border-white/[0.15]",
       )}
     >
       {children}
